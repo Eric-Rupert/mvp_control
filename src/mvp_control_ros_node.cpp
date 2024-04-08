@@ -1,37 +1,20 @@
-/*
-    This file is part of MVP-Control program.
 
-    MVP-Control is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+#include "mvp_control/mvp_control_ros.hpp"
 
-    MVP-Control is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with MVP-Control.  If not, see <https://www.gnu.org/licenses/>.
-
-    Author: Emir Cem Gezer
-    Email: emircem@uri.edu;emircem.gezer@gmail.com
-    Year: 2022
-
-    Copyright (C) 2022 Smart Ocean Systems Laboratory
-*/
-
-#include "mvp_control/mvp_control_ros.h"
+#include "iostream"
 
 int main(int argc, char* argv[]) {
 
-    ros::init(argc, argv, "mvp_control");
+    rclcpp::init(argc, argv);
+    // ctrl::MvpControlROS control_ros;
+    auto control_ros = std::make_shared<ctrl::MvpControlROS>();
+    
+    control_ros->initialize();
 
-    ctrl::MvpControlROS control_ros;
+    rclcpp::spin(control_ros);
 
-    control_ros.initialize();
-
-    ros::spin();
+    rclcpp::shutdown();
 
     return 0;
+
 }

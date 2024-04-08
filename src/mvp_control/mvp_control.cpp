@@ -21,10 +21,10 @@
     Copyright (C) 2022 Smart Ocean Systems Laboratory
 */
 
-#include "mvp_control.h"
-#include "ros/ros.h"
-#include "mvp_control/dictionary.h"
-#include "exception.hpp"
+#include "mvp_control/mvp_control.hpp"
+#include "rclcpp/rclcpp.hpp"
+#include "mvp_control/dictionary.hpp"
+#include "mvp_control/exception.hpp"
 #include "functional"
 
 using namespace ctrl;
@@ -116,12 +116,14 @@ bool MvpControl::calculate_needed_forces(Eigen::VectorXd *f, double dt) {
     if(!f_calculate_pid(&u, dt)){
         return false;
     }
+    // std::cout<<"control_effort: "<< u.transpose()<<std::endl;
 
     /**
      * Below code computes the forces that later will be requested from the
      * thrusters. Values in the force vector are not thruster set points yet.
      */
     if(f_optimize_thrust(f, u)) {
+        // std::cout<<"f: "<< f<<std::endl;
         return true;
     } else {
         // todo: create a warning
@@ -142,7 +144,7 @@ bool MvpControl::f_optimize_thrust(Eigen::VectorXd *t, Eigen::VectorXd u) {
         m_control_allocation_matrix.cols()
     );
 
-    // Control matrix
+    // // Control matrix
     Eigen::VectorXd U(m_controlled_freedoms.size());
 
     {
@@ -278,16 +280,9 @@ Eigen::ArrayXd MvpControl::f_error_function(Eigen::ArrayXd desired,
     Eigen::ArrayXd error = desired - current;
 
     for(const auto& i : {DOF::ROLL, DOF::PITCH, DOF::YAW,
-                         DOF::ROLL_RATE, DOF::PITCH_RATE, DOF::YAW_RATE}) {
+                         DOF::P, DOF::Q, DOF::R}) {
 
         // todo: wrap2pi implementation
-
-        // auto d = (fmod(desired(i) + M_PI, 2*M_PI) - M_PI);
-        // auto c = (fmod(current(i) + M_PI, 2*M_PI) - M_PI);
-
-        // auto t = d - c;
-        // double diff = (fmod(t + M_PI, 2*M_PI) - M_PI);
-        // error(i) = diff < -M_PI ? diff + 2*M_PI : diff;
 
         //wrap desired and current in to -pi to pi
         auto d = (fmod(desired(i) + std::copysign(M_PI, desired(i)), 2*M_PI) 

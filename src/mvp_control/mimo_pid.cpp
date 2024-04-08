@@ -21,12 +21,13 @@
     Copyright (C) 2022 Smart Ocean Systems Laboratory
 */
 
-#include "mimo_pid.h"
-#include "exception.hpp"
+#include "mvp_control/mimo_pid.hpp"
+#include "mvp_control/exception.hpp"
+#include <iostream>
 
 using namespace ctrl;
 
-MimoPID::MimoPID() : m_error_function(nullptr) , m_dt_i(10000){
+MimoPID::MimoPID() : m_dt_i(10000), m_error_function(nullptr) {
 
 }
 
@@ -37,7 +38,8 @@ bool MimoPID::calculate(Eigen::VectorXd* u, const Eigen::ArrayXd& desired, const
     }
 
     Eigen::ArrayXd error = m_error_function(desired, current);
-
+   
+    
     if(m_i.size() == 0) {
         m_i.resize(error.size());
     }
@@ -61,6 +63,10 @@ bool MimoPID::calculate(Eigen::VectorXd* u, const Eigen::ArrayXd& desired, const
     m_pe = error;
 
     *u = p + m_i + d;
+
+    // std::cout<<"error_p:"<< p <<std::endl;
+    // std::cout<<"error_i:"<< m_i <<std::endl;
+    // std::cout<<"error_d:"<< d <<std::endl;
 
     return true;
 }

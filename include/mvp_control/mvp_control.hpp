@@ -44,7 +44,7 @@
 /*******************************************************************************
  * MVP
  */
-#include "mimo_pid.h"
+#include "mvp_control/mimo_pid.hpp"
 
 namespace ctrl {
 /** @brief MvpControl Class

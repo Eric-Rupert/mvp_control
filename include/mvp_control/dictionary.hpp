@@ -27,7 +27,7 @@
 #include "string"
 #include "map"
 
-#include "mvp_msgs/ControlModes.h"
+#include "mvp_msgs/msg/control_modes.hpp"
 
 namespace ctrl {
 
@@ -37,12 +37,12 @@ namespace ctrl {
     static constexpr const char * CONF_DOF_ROLL = "roll";
     static constexpr const char * CONF_DOF_PITCH = "pitch";
     static constexpr const char * CONF_DOF_YAW = "yaw";
-    static constexpr const char * CONF_DOF_SURGE = "surge";
-    static constexpr const char * CONF_DOF_SWAY = "sway";
-    static constexpr const char * CONF_DOF_HEAVE = "heave";
-    static constexpr const char * CONF_DOF_ROLL_RATE = "roll_rate";
-    static constexpr const char * CONF_DOF_PITCH_RATE = "pitch_rate";
-    static constexpr const char * CONF_DOF_YAW_RATE = "yaw_rate";
+    static constexpr const char * CONF_DOF_U = "u";
+    static constexpr const char * CONF_DOF_V = "v";
+    static constexpr const char * CONF_DOF_W = "w";
+    static constexpr const char * CONF_DOF_P = "p";
+    static constexpr const char * CONF_DOF_Q = "q";
+    static constexpr const char * CONF_DOF_R = "r";
 
     static constexpr const char * CONF_THRUSTER_POLY = "thruster_polynomials";
     static constexpr const char * CONF_THRUST_COMMAND_TOPICS = "thruster_command_topics";
@@ -61,6 +61,10 @@ namespace ctrl {
     static constexpr const char * CONF_TF_PREFIX_DEFAULT = "";
     static constexpr const char * CONF_CG_LINK = "cg_link";
     static constexpr const char * CONF_CG_LINK_DEFAULT = "cg_link";
+
+    static constexpr const char * CONF_CHILD_LINK = "child_link";
+    static constexpr const char * CONF_CHILD_LINK_DEFAULT = "cg_link";
+
     static constexpr const char * CONF_WORLD_LINK = "world_link";
     static constexpr const char * CONF_WORLD_LINK_DEFAULT = "world";
     static constexpr const char * CONF_ODOMETRY_SOURCE = "odometry_source";
@@ -92,34 +96,34 @@ namespace ctrl {
     struct DOF {
         //! @NOTE: ROLL_RATE, PITCH_RATE, YAW_RATE are controlle in global frame
         enum IDX : int {
-            X =             mvp_msgs::ControlMode::DOF_X,
-            Y =             mvp_msgs::ControlMode::DOF_Y,
-            Z =             mvp_msgs::ControlMode::DOF_Z,
-            ROLL =          mvp_msgs::ControlMode::DOF_ROLL,
-            PITCH =         mvp_msgs::ControlMode::DOF_PITCH,
-            YAW =           mvp_msgs::ControlMode::DOF_YAW,
-            SURGE =         mvp_msgs::ControlMode::DOF_SURGE,
-            SWAY =          mvp_msgs::ControlMode::DOF_SWAY,
-            HEAVE =         mvp_msgs::ControlMode::DOF_HEAVE,
-            ROLL_RATE =     mvp_msgs::ControlMode::DOF_ROLL_RATE,
-            PITCH_RATE =    mvp_msgs::ControlMode::DOF_PITCH_RATE,
-            YAW_RATE =      mvp_msgs::ControlMode::DOF_YAW_RATE,
+            X =             mvp_msgs::msg::ControlMode::DOF_X,
+            Y =             mvp_msgs::msg::ControlMode::DOF_Y,
+            Z =             mvp_msgs::msg::ControlMode::DOF_Z,
+            ROLL =          mvp_msgs::msg::ControlMode::DOF_ROLL,
+            PITCH =         mvp_msgs::msg::ControlMode::DOF_PITCH,
+            YAW =           mvp_msgs::msg::ControlMode::DOF_YAW,
+            U =             mvp_msgs::msg::ControlMode::DOF_U,
+            V =             mvp_msgs::msg::ControlMode::DOF_V,
+            W =             mvp_msgs::msg::ControlMode::DOF_W,
+            P =             mvp_msgs::msg::ControlMode::DOF_P,
+            Q =             mvp_msgs::msg::ControlMode::DOF_Q,
+            R =             mvp_msgs::msg::ControlMode::DOF_R,
         };
     };
 
     static const std::map<const char *, int> CONF_DOF_LOOKUP = {
-        {CONF_DOF_X,          DOF::X},
-        {CONF_DOF_Y,          DOF::Y},
-        {CONF_DOF_Z,          DOF::Z},
-        {CONF_DOF_ROLL,       DOF::ROLL},
-        {CONF_DOF_PITCH,      DOF::PITCH},
-        {CONF_DOF_YAW,        DOF::YAW},
-        {CONF_DOF_SURGE,      DOF::SURGE},
-        {CONF_DOF_SWAY,       DOF::SWAY},
-        {CONF_DOF_HEAVE,      DOF::HEAVE},
-        {CONF_DOF_ROLL_RATE,  DOF::ROLL_RATE},
-        {CONF_DOF_PITCH_RATE, DOF::PITCH_RATE},
-        {CONF_DOF_YAW_RATE,   DOF::YAW_RATE},
+        {CONF_DOF_X,        DOF::X},
+        {CONF_DOF_Y,        DOF::Y},
+        {CONF_DOF_Z,        DOF::Z},
+        {CONF_DOF_ROLL,     DOF::ROLL},
+        {CONF_DOF_PITCH,    DOF::PITCH},
+        {CONF_DOF_YAW,      DOF::YAW},
+        {CONF_DOF_U,        DOF::U},
+        {CONF_DOF_V,        DOF::V},
+        {CONF_DOF_W,        DOF::W},
+        {CONF_DOF_P,        DOF::P},
+        {CONF_DOF_Q,        DOF::Q},
+        {CONF_DOF_R,        DOF::R},
     };
 
     static const char * const DOFS[] = {
@@ -129,12 +133,12 @@ namespace ctrl {
         CONF_DOF_ROLL,
         CONF_DOF_PITCH,
         CONF_DOF_YAW,
-        CONF_DOF_SURGE,
-        CONF_DOF_SWAY,
-        CONF_DOF_HEAVE,
-        CONF_DOF_ROLL_RATE,
-        CONF_DOF_PITCH_RATE,
-        CONF_DOF_YAW_RATE,
+        CONF_DOF_U,
+        CONF_DOF_V,
+        CONF_DOF_W,
+        CONF_DOF_P,
+        CONF_DOF_Q,
+        CONF_DOF_R,
         nullptr
     };
 

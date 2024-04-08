@@ -21,15 +21,16 @@
     Copyright (C) 2022 Smart Ocean Systems Laboratory
 */
 
-#include "thruster_ros.h"
+#include "mvp_control/thruster_ros.hpp"
 
 #include "utility"
-#include "exception.hpp"
-#include "mvp_control/dictionary.h"
+#include "mvp_control/exception.hpp"
+#include "mvp_control/dictionary.hpp"
+#include "std_msgs/msg/float64.hpp"
 
 using namespace ctrl;
 
-ThrusterROS::ThrusterROS() {
+ThrusterROS::ThrusterROS(){
     m_poly_solver.reset(new PolynomialSolver());
 }
 
@@ -39,8 +40,7 @@ ThrusterROS::ThrusterROS(std::string id, std::string topic_id, Eigen::VectorXd c
         m_contribution_vector(std::move(contribution_vector))
 {
 
-    m_thrust_publisher = m_nh.advertise<std_msgs::Float64>(
-        m_thrust_command_topic_id, 10);
+    // m_thrust_publisher = this->create_publisher<std_msgs::msg::Float64>(m_thrust_command_topic_id, 10);
 
     m_poly_solver.reset(new PolynomialSolver());
 }
@@ -78,17 +78,13 @@ void ThrusterROS::set_contribution_vector(const decltype(m_contribution_vector)&
 }
 
 void ThrusterROS::initialize() {
-
     if(!m_thrust_command_topic_id.empty()) {
-        m_thrust_publisher = m_nh.advertise<std_msgs::Float64>(
-            m_thrust_command_topic_id, 100);
+        // m_thrust_publisher = this->create_publisher<std_msgs::msg::Float64>(m_thrust_command_topic_id, 100);
     } else {
         throw control_ros_exception("empty topic name");
     }
-
     if(!m_thrust_command_topic_id.empty()) {
-         m_force_publisher = m_nh.advertise<std_msgs::Float64>(
-             m_thrust_force_topic_id, 100);
+        //  m_force_publisher = this->create_publisher<std_msgs::msg::Float64>(m_thrust_force_topic_id, 100);
     } else {
         throw control_ros_exception("empty topic name");
     }
@@ -103,9 +99,9 @@ void ThrusterROS::set_link_id(const decltype(m_link_id)& link_id) {
 }
 
 void ThrusterROS::command(double cmd) {
-    std_msgs::Float64 msg;
+    std_msgs::msg::Float64 msg;
     msg.data = cmd;
-    m_thrust_publisher.publish(msg);
+    // m_thrust_publisher->publish(msg);
 }
 
 auto ThrusterROS::get_poly_solver() -> decltype(m_poly_solver) {
@@ -116,12 +112,13 @@ void ThrusterROS::set_poly_solver(decltype(m_poly_solver) solver) {
     m_poly_solver = std::move(solver);
 }
 
-bool ThrusterROS::request_force(double N) {
-    std::vector<std::complex<double>> roots;
+bool ThrusterROS::request_force(double N, std::vector<std::complex<double>> &roots ) {
 
-    std_msgs::Float64  msg;
-    msg.data = N;
-    m_force_publisher.publish(msg);
+    // std::vector<std::complex<double>> roots;
+
+    // std_msgs::msg::Float64 msg;
+    // msg.data = N;
+    // m_force_publisher->publish(msg);
 
     if(N > m_force_max) {
         N = m_force_max;
@@ -130,23 +127,25 @@ bool ThrusterROS::request_force(double N) {
     }
 
     if(!m_poly_solver->solve_for_y(roots, N)) {
-        ROS_WARN_STREAM("No feasible command found for force: " << N);
+        // ROS_WARN_STREAM("No feasible command found for force: " << N);
+        // RCLCPP_WARN_STREAM(this->get_logger(), "No feasible command found for force: " << N);
+        printf("####No feasible command found for force %lf\r\n", N);
         return false;
     }
 
-    for(const auto& r : roots) {
-        if(r.imag() != 0){
-            continue;
-        }
+    // for(const auto& r : roots) {
+    //     if(r.imag() != 0){
+    //         continue;
+    //     }
 
-        if(r.real() >= 1 || r.real() < -1) {
-            continue;
-        }
+    //     if(r.real() >= 1 || r.real() < -1) {
+    //         continue;
+    //     }
 
-        command(r.real());
+    //     // command(r.real());
 
-        break;
-    }
+    //     break;
+    // }
 
     return true;
 }

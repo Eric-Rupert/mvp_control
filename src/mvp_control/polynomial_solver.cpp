@@ -21,7 +21,7 @@
     Copyright (C) 2022 Smart Ocean Systems Laboratory
 */
 
-#include "polynomial_solver.h"
+#include "mvp_control/polynomial_solver.hpp"
 #include "utility"
 #include "cstring"
 

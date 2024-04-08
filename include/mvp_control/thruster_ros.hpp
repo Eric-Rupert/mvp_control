@@ -23,10 +23,14 @@
 
 #pragma once
 
-#include "ros/ros.h"
-#include "std_msgs/Float64.h"
+#include "rclcpp/rclcpp.hpp"
+#include "std_msgs/msg/float64.hpp"
 #include "Eigen/Dense"
-#include "polynomial_solver.h"
+#include "mvp_control/polynomial_solver.hpp"
+
+#include "chrono"
+#include "thread"
+#include <fstream> 
 
 
 namespace ctrl {
@@ -38,13 +42,10 @@ namespace ctrl {
      */
     class ThrusterROS {
     private:
-
+        // rclcpp::node_interfaces::NodeLoggingInterface::SharedPtr node_logger_;
         friend MvpControlROS;
-
-
-        //! @brief Public node handler
-        ros::NodeHandle m_nh;
-
+        // rclcpp::Node::SharedPtr node_;
+        
         //! @brief Thruster ID
         std::string m_id;
 
@@ -53,6 +54,9 @@ namespace ctrl {
 
         //! @brief Thruster force topic id
         std::string m_thrust_force_topic_id;
+        
+        //! @brief Public node handler
+        // std::shared_ptr<rclcpp::Node> m_nh;
 
         //! @brief thruster link id
         std::string m_link_id;
@@ -66,10 +70,9 @@ namespace ctrl {
         Eigen::VectorXd m_contribution_vector;
 
         //! @brief Thrust publisher
-        ros::Publisher m_thrust_publisher;
-
+        rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr m_thrust_publisher;
         //! @brief Thrust force publisher
-        ros::Publisher m_force_publisher;
+        rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr m_force_publisher;
 
         //! @brief Polynomial solver
         PolynomialSolver::Ptr m_poly_solver;
@@ -94,7 +97,6 @@ namespace ctrl {
          */
         ThrusterROS(std::string id, std::string topic_id,
                     Eigen::VectorXd contribution_vector);
-
         /** @brief Initializes publishers and subscribers
          *
          */
@@ -196,7 +198,7 @@ namespace ctrl {
          * @param N force as newton
          * @return true if polynomial is solved, false if polynomial isn't solved.
          */
-        bool request_force(double N);
+        bool request_force(double N, std::vector<std::complex<double>> &roots );
     };
 
 }

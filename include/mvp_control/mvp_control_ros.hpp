@@ -28,36 +28,38 @@
  */
 #include "functional"
 #include "thread"
-
+#include <string>
 /*******************************************************************************
  * ROS
  */
-#include "ros/ros.h"
+#include "rclcpp/rclcpp.hpp"
 
 #include "tf2/LinearMath/Matrix3x3.h"
-#include "tf2_eigen/tf2_eigen.h"
+#include "tf2_eigen/tf2_eigen.hpp"
 #include "tf2_ros/transform_listener.h"
+#include "tf2_ros/buffer.h"
+#include "tf2_ros/static_transform_broadcaster.h"
 
-#include "std_msgs/Float32.h"
-#include "std_srvs/Empty.h"
-#include "nav_msgs/Odometry.h"
-#include "dynamic_reconfigure/server.h"
+#include "std_msgs/msg/float32.hpp"
+#include "std_srvs/srv/empty.hpp"
+#include "nav_msgs/msg/odometry.hpp"
+// #include "dynamic_reconfigure/server.h"
 
-#include "mvp_control/PIDConfig.h"
+// #include "mvp_control/PIDConfig.h"
 
-#include "mvp_msgs/PIDgains.h"
-#include "mvp_msgs/ControlProcess.h"
-#include "mvp_msgs/ControlModes.h"
-#include "mvp_msgs/GetControlMode.h"
-#include "mvp_msgs/GetControlModes.h"
-#include "mvp_msgs/SetControlPoint.h"
+#include "mvp_msgs/msg/pid_gains.hpp"
+#include "mvp_msgs/msg/control_process.hpp"
+#include "mvp_msgs/msg/control_modes.hpp"
+#include "mvp_msgs/srv/get_control_mode.hpp"
+#include "mvp_msgs/srv/get_control_modes.hpp"
+#include "mvp_msgs/srv/set_control_point.hpp"
 
 /*******************************************************************************
  * MVP
  */
 
-#include "mvp_control.h"
-#include "thruster_ros.h"
+#include "mvp_control/mvp_control.hpp"
+#include "mvp_control/thruster_ros.hpp"
 
 
 /*******************************************************************************
@@ -80,7 +82,24 @@ namespace ctrl {
  *
  *  @see MvpControl
  */
-    class MvpControlROS {
+    class MvpControlROS : public rclcpp::Node
+    {
+    public:
+        /** @brief Default constructor
+         *
+         */
+        MvpControlROS(std::string name = "mvp_control");
+        /** @brief Initializer for Mvp Control ROS
+         *
+         * This function initializes control allocation matrix and
+         *
+         */
+        void initialize();
+
+        //! @brief Generic typedef for shared pointer
+        // typedef std::shared_ptr<MvpControlROS> Ptr;
+        // std::shared_ptr<rclcpp::Node> m_nh;
+
     private:
         /*! @brief Generator Type enum class
          *
@@ -92,10 +111,10 @@ namespace ctrl {
         };
 
         //! @brief Public node handler
-        ros::NodeHandle m_nh;
+        // std::shared_ptr<rclcpp::Node> m_nh;
 
         //! @brief Private node handler
-        ros::NodeHandle m_pnh;
+        
 
         //! @brief Thruster list
         std::vector<ThrusterROS::Ptr> m_thrusters;
@@ -107,20 +126,27 @@ namespace ctrl {
          */
         Eigen::MatrixXd m_control_allocation_matrix;
 
-        //! @brief Control allocation matrix generator type
-        GeneratorType m_generator_type;
 
         //! @brief Center of gravity link id
         std::string m_cg_link_id;
 
+        std::string m_child_link_id;
+
         //! @brief World link id
         std::string m_world_link_id;
 
+        //! @brief mvp_control config yaml file
+        std::string m_control_config_file;
+
         //! @brief Transform buffer for TF2
-        tf2_ros::Buffer m_transform_buffer;
+        std::unique_ptr<tf2_ros::Buffer> m_transform_buffer;
+        // std::unique_ptr<tf2_ros::Buffer> m_transform_buffer;
 
         //! @brief Transform listener for TF2
-        tf2_ros::TransformListener m_transform_listener;
+        std::unique_ptr<tf2_ros::TransformListener> m_transform_listener;
+        
+        //! @brief Control allocation matrix generator type
+        GeneratorType m_generator_type;
 
         //! @brief Transform prefix
         std::string m_tf_prefix;
@@ -138,40 +164,55 @@ namespace ctrl {
         double m_controller_frequency;
 
         //! @brief Get control modes ros service server
-        ros::ServiceServer m_get_control_modes_server;
+        // ros::ServiceServer m_get_control_modes_server;
+        rclcpp::Service<mvp_msgs::srv::GetControlModes>::SharedPtr m_get_control_modes_server;
 
         //! @brief Set control point ros service server
-        ros::ServiceServer m_set_control_point_server;
+        // ros::ServiceServer m_set_control_point_server;
+        rclcpp::Service<mvp_msgs::srv::SetControlPoint>::SharedPtr m_set_control_point_server;
 
         //! @brief Enable controller ros service server
-        ros::ServiceServer m_enable_controller_server;
+        // ros::ServiceServer m_enable_controller_server;
+        rclcpp::Service<std_srvs::srv::Empty>::SharedPtr m_enable_controller_server;
 
         //! @brief Disable controller ros service server
-        ros::ServiceServer m_disable_controller_server;
+        // ros::ServiceServer m_disable_controller_server;
+        rclcpp::Service<std_srvs::srv::Empty>::SharedPtr m_disable_controller_server;
 
         //! @brief Active mode getter ros service server
-        ros::ServiceServer m_get_active_mode_server;
+        // ros::ServiceServer m_get_active_mode_server;
+        rclcpp::Service<mvp_msgs::srv::GetControlMode>::SharedPtr m_get_active_mode_server;
 
         //! @brief Trivial subscriber
-        ros::Subscriber m_odometry_subscriber;
+        // ros::Subscriber m_odometry_subscriber;
+        rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr m_odometry_subscriber;
 
         //! @brief Process value publisher
-        ros::Publisher m_process_value_publisher;
+        // ros::Publisher m_process_value_publisher;
+        rclcpp::Publisher<mvp_msgs::msg::ControlProcess>::SharedPtr m_process_value_publisher;
 
         //! @brief Set point subscriber
-        ros::Subscriber m_set_point_subscriber;
+        // ros::Subscriber m_set_point_subscriber;
+        rclcpp::Subscription<mvp_msgs::msg::ControlProcess>::SharedPtr m_set_point_subscriber;
 
         //! @brief Publishes process error publisher
-        ros::Publisher m_process_error_publisher;
+        // ros::Publisher m_process_error_publisher;
+        rclcpp::Publisher<mvp_msgs::msg::ControlProcess>::SharedPtr m_process_error_publisher;
+
+        // //! @brief Thrust publisher
+        // rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr m_thrust_publisher;
+
+        // //! @brief Thrust force publisher
+        // rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr m_force_publisher;
 
         //! @brief Holder for latest odometry msg
-        nav_msgs::Odometry m_odometry_msg;
+        nav_msgs::msg::Odometry m_odometry_msg;
 
         //! @brief Control modes stored as ros message
-        mvp_msgs::ControlModes m_control_modes;
+        mvp_msgs::msg::ControlModes m_control_modes;
 
         //! @brief Desired state of the system, set point of the controller
-        mvp_msgs::ControlProcess m_set_point_msg;
+        mvp_msgs::msg::ControlProcess m_set_point_msg;
 
         //! @brief Current control mode
         std::string m_control_mode;
@@ -192,20 +233,14 @@ namespace ctrl {
         bool m_enabled;
 
         //! @brief Dynamic configure server for PID configuration
-        std::shared_ptr<dynamic_reconfigure::Server<mvp_control::PIDConfig>>
-            m_dynconf_pid_server;
+        // std::shared_ptr<dynamic_reconfigure::Server<mvp_control::PIDConfig>>
+            // m_dynconf_pid_server;
 
         /** @brief Generates control allocation matrix from transform tree
          *
          *  This method is called if generator_type is 'tf'
          */
         void f_generate_control_allocation_from_tf();
-
-        /** @brief Generates control allocation matrix from user input
-         *
-         *  This method is called if generator_type is 'user'
-         */
-        void f_generate_control_allocation_from_user();
 
         /**!
          * @brief Generates control allocation matrix
@@ -219,6 +254,12 @@ namespace ctrl {
          * @return
          */
         bool f_update_control_allocation_matrix();
+        /**
+         * @brief initial tf check to make sure the tf is up running
+         * @return
+         */
+        bool f_initial_tf_check();
+
 
         /** @brief Generate thrusters
          *
@@ -229,6 +270,7 @@ namespace ctrl {
          *
          */
         void f_read_control_modes();
+        void f_load_control_config();
 
         /** @brief Compute process values
          *
@@ -272,27 +314,28 @@ namespace ctrl {
          * @param set_point
          * @return
          */
-        bool f_amend_set_point(const mvp_msgs::ControlProcess &set_point);
+
+        bool f_amend_set_point(const mvp_msgs::msg::ControlProcess::SharedPtr set_point);
 
         /** @brief Trivial subscriber
          *
          * @param msg
          */
-        void f_cb_msg_odometry(const nav_msgs::Odometry::ConstPtr &msg);
+        void f_cb_msg_odometry(const nav_msgs::msg::Odometry::SharedPtr msg);
 
         /** @brief Trivial set point callback
          *
          * @param msg
          */
         void f_cb_srv_set_point(
-            const mvp_msgs::ControlProcess::ConstPtr &msg);
+            const mvp_msgs::msg::ControlProcess::SharedPtr msg);
 
         /** @brief Dynamic reconfigure server callback
          *
          * @param config
          * @param level
          */
-        void f_cb_dynconf_pid(mvp_control::PIDConfig &config, uint32_t level);
+        // void f_cb_dynconf_pid(mvp_control::PIDConfig &config, uint32_t level);
 
         /** @brief Trivial ros service server callback for get control modes
          *
@@ -303,8 +346,8 @@ namespace ctrl {
          * @return Success of the operation
          */
         bool f_cb_srv_get_control_modes(
-            mvp_msgs::GetControlModes::Request &req,
-            mvp_msgs::GetControlModes::Response &resp);
+            const std::shared_ptr<mvp_msgs::srv::GetControlModes::Request> req,
+            const std::shared_ptr<mvp_msgs::srv::GetControlModes::Response> resp);
 
         /** @brief Trivial ros service server callback for set control point
          *
@@ -313,8 +356,8 @@ namespace ctrl {
          * @return Success of the operation
          */
         bool f_cb_srv_set_control_point(
-            mvp_msgs::SetControlPoint::Request req,
-            mvp_msgs::SetControlPoint::Response resp);
+            const std::shared_ptr<mvp_msgs::srv::SetControlPoint::Request> req,
+            const std::shared_ptr<mvp_msgs::srv::SetControlPoint::Response> resp);
 
         /**
          * @brief Enables the controller
@@ -325,8 +368,8 @@ namespace ctrl {
          * @return false
          */
         bool f_cb_srv_enable(
-            std_srvs::Empty::Request req,
-            std_srvs::Empty::Response resp);
+            const std::shared_ptr<std_srvs::srv::Empty::Request> req,
+            const std::shared_ptr<std_srvs::srv::Empty::Response> resp);
 
         /**
          * @brief disable the controller
@@ -337,8 +380,8 @@ namespace ctrl {
          * @return false
          */
         bool f_cb_srv_disable(
-            std_srvs::Empty::Request req,
-            std_srvs::Empty::Response resp);
+            const std::shared_ptr<std_srvs::srv::Empty::Request> req,
+            const std::shared_ptr<std_srvs::srv::Empty::Response> resp);
 
         /**
          * @brief Get active control mode
@@ -347,27 +390,8 @@ namespace ctrl {
          * @return true Always returns true
          */
         bool f_cb_srv_get_active_mode(
-            mvp_msgs::GetControlMode::Request &req,
-            mvp_msgs::GetControlMode::Response &resp);
-
-    public:
-
-        /** @brief Default constructor
-         *
-         */
-        MvpControlROS();
-
-        /** @brief Initializer for Mvp Control ROS
-         *
-         * This function initializes control allocation matrix and
-         *
-         */
-        void initialize();
-
-        //! @brief Generic typedef for shared pointer
-        typedef std::shared_ptr<MvpControlROS> Ptr;
-
-
+            const std::shared_ptr<mvp_msgs::srv::GetControlMode::Request> req,
+            const std::shared_ptr<mvp_msgs::srv::GetControlMode::Response> resp);
     };
 
 }
