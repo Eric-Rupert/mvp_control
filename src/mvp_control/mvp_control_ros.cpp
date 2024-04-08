@@ -361,6 +361,26 @@ bool MvpControlROS::f_initial_tf_check(){
     }
 
     RCLCPP_INFO_STREAM(this->get_logger(), "thrust to cg_link found");
+    
+    //check fins to cg_link is up.
+    // For each thruster look up transformation
+    for(const auto& t : m_fins) {
+        try {
+            geometry_msgs::msg::TransformStamped tf_cg_fin = m_transform_buffer->lookupTransform(
+                m_cg_link_id,
+                t->get_link_id(),
+                tf2::TimePointZero,
+                10ms
+                );
+
+        } catch (const tf2::TransformException & e) {
+            RCLCPP_WARN_STREAM_THROTTLE(this->get_logger(), steady_clock, 10, std::string("Can't find TF for fins: ") + e.what());
+            RCLCPP_INFO( this->get_logger(), "Could not transform %s to %s: %s",
+                         t->get_link_id().c_str(), m_cg_link_id.c_str(), e.what() ); 
+          return false;
+        }
+    
+    
     RCLCPP_INFO_STREAM(this->get_logger(), "MVP control initialized");
     return true;
 
@@ -380,6 +400,16 @@ void MvpControlROS::initialize() {
     );
 
     RCLCPP_INFO_STREAM(this->get_logger(), "#### Thruster initialized ####");
+
+     // Initialize fin objects.
+    std::for_each(m_fins.begin(),m_fins.end(),
+        [](const FinROS::Ptr& ff){
+            ff->initialize();
+        }
+    );
+
+    RCLCPP_INFO_STREAM(this->get_logger(), "#### Fin initialized ####");
+
 
     // Generate thrusters with the given configuration
     while(!f_initial_tf_check())
@@ -944,6 +974,62 @@ void MvpControlROS::f_load_control_config()
         }
 
 
+    }
+
+
+    //load fin params
+    if(map["fin_ids"])
+    {
+        std::vector<std::string> fin_id_list;
+        //load the fin name
+        for(YAML::const_iterator it=map["fin_ids"].begin();it != map["fin_ids"].end(); ++it) 
+        {
+            std::string f_name = it->first.as<std::string>();       // fin_name
+            FinROS::Ptr ff(new FinROS());
+            ff->set_id(f_name);
+
+            std::string param_name; 
+            
+            //get fin parameters:
+            std::string link_id;
+            param_name = map["fin_ids"][f_name]["control_tf"].as<std::string>();
+            this->declare_parameter(std::string()+CONF_CONTROL_TF + "/" + f_name + "_fin_link", param_name);
+            this->get_parameter(std::string()+CONF_CONTROL_TF + "/" + f_name + "_fin_link", link_id);
+            ff->set_link_id(m_tf_prefix + link_id);
+
+            //get joint_name
+            param_name = map["fin_ids"][f_name]["joint_name"].as<std::string>();
+            // printf("    command_topic: %s\r\n", topic_name.c_str());
+            this->declare_parameter(std::string()+CONF_FIN_JOINT_NAME + "/" + f_name, param_name);
+            ff->set_fin_joint_name(m_tf_prefix + param_name);
+
+            //get joint state topic
+            param_name = map["fin_ids"][f_name]["joint_state_topic"].as<std::string>();
+            // printf("    command_topic: %s\r\n", topic_name.c_str());
+            this->declare_parameter(std::string()+CONF_FIN_JOINT_STATE_TOPIC + "/" + f_name, param_name);
+            ff->set_fin_joint_state_topic(m_tf_prefix + param_name);
+            ff->m_fin_publisher = this->create_publisher<sensor_msgs::msg::JointState>(param_name, 10);
+            printf("####Fin: %s, joint topic name: %s\r\n", f_name.c_str(), param_name.c_str());
+            
+            //get aoa limit
+            std::vector<float> min_max;
+            min_max = map["fin_ids"][f_name]["limits"].as<std::vector<float> >();
+            // printf("    MAX: %f to %f\r\n", min_max[0], min_max[1]);
+            this->declare_parameter(std::string()+CONF_FIN_AOA_LIMITS + "/" + f_name + "/" + CONF_FIN_AOA_MIN, min_max[0]);
+            this->get_parameter(std::string()+CONF_FIN_AOA_LIMITS + "/" + f_name + "/" + CONF_FIN_AOA_MIN, ff->m_aoa_min);
+            this->declare_parameter(std::string()+CONF_FIN_AOA_LIMITS + "/" + f_name + "/" + CONF_FIN_AOA_MAX, min_max[1]);
+            this->get_parameter(std::string()+CONF_FIN_AOA_LIMITS + "/" + f_name + "/" + CONF_FIN_AOA_MAX, ff->m_aoa_max);
+
+
+            //get coefficient
+            std::vector<double> fin_coef;
+            fin_coef = map["fin_ids"][f_name]["coefficients"].as<std::vector<double>>();
+            // std::cout<<poly_coef<<std::endl;
+            this->declare_parameter(std::string()+CONF_FIN_COEF + "/" + f_name, fin_coef);
+
+            m_fins.emplace_back(ff);
+        }
+    
     }
 
     f_amend_control_mode(*modes.begin());

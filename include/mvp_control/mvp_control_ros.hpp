@@ -60,7 +60,7 @@
 
 #include "mvp_control/mvp_control.hpp"
 #include "mvp_control/thruster_ros.hpp"
-
+#include "mvp_control/fin_ros.hpp"
 
 /*******************************************************************************
  * Eigen
@@ -119,6 +119,8 @@ namespace ctrl {
         //! @brief Thruster list
         std::vector<ThrusterROS::Ptr> m_thrusters;
 
+        std::vector<FinROS::Ptr> m_fins;
+        
         /**! @brief Control Allocation Matrix
          *
          *  Control allocation matrix is generated from individual

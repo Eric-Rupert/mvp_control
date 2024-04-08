@@ -53,6 +53,15 @@ namespace ctrl {
     static constexpr const char * CONF_THRUSTER_MAX = "max";
     static constexpr const char * CONF_THRUSTER_MIN = "min";
 
+    static constexpr const char * CONF_FIN_JOINT_NAME = "fin_joint_name";
+    static constexpr const char * CONF_FIN_JOINT_STATE_TOPIC = "fin_joint_state_topic";
+    static constexpr const char * CONF_FIN_AOA_MIN = "fin_aoa_min";
+    static constexpr const char * CONF_FIN_AOA_MAX = "fin_aoa_max";
+    static constexpr const char * CONF_FIN_AOA_LIMITS = "fin_aoa_limits";
+    static constexpr const char * CONF_FIN_COEF = "fin_coefficients";
+
+
+
     static constexpr const char * CONF_GENERATOR_TYPE = "generator_type";
     static constexpr const char * CONF_GENERATOR_TYPE_OPT_TF = "tf";
     static constexpr const char * CONF_GENERATOR_TYPE_OPT_USER = "user";

@@ -83,7 +83,7 @@ void ThrusterROS::initialize() {
     } else {
         throw control_ros_exception("empty topic name");
     }
-    if(!m_thrust_command_topic_id.empty()) {
+    if(!m_thrust_force_topic_id.empty()) {
         //  m_force_publisher = this->create_publisher<std_msgs::msg::Float64>(m_thrust_force_topic_id, 100);
     } else {
         throw control_ros_exception("empty topic name");

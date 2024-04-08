@@ -17,3 +17,19 @@ control_modes:
     z:        {p: 20.0,   i: 1.0 ,  d: 5.0,  i_max: 20, i_min: -20}
     pitch:    {p: 10.0,   i: 0.01,  d: 5.0,  i_max: 20, i_min: -20}
     yaw:      {p: 10.0,   i: 0.2,   d: 5.0,  i_max: 20, i_min: -20}
+
+thruster_ids:
+  surge:
+    control_tf: surge_thruster_link
+    command_topic: control/thruster/surge
+    force_topic: control/force/surge
+    limits: [-10.0, 60.0] #[min, max]
+    polynomials: [0.3281, 44.1281, 22.8029, 84.2361, -6.5710, -41.5185]
+
+fin_ids:
+  top_fin:
+    control_tf: top_fin_base_link
+    joint_state_topic: fin_joints
+    joint_name: top_fin_servo_joint
+    limits: [-0.175, 0.175] #radians of the aoa
+    coefficients: [1, 0.1, 1] # [a, b, c] ##Drag = a*aoa^2 + b, Lift = c*aoa
