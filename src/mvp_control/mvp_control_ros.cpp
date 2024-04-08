@@ -379,7 +379,7 @@ bool MvpControlROS::f_initial_tf_check(){
                          t->get_link_id().c_str(), m_cg_link_id.c_str(), e.what() ); 
           return false;
         }
-    
+    }
     
     RCLCPP_INFO_STREAM(this->get_logger(), "MVP control initialized");
     return true;
