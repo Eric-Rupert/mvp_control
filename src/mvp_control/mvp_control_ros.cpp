@@ -82,7 +82,8 @@ MvpControlROS::MvpControlROS(std::string name) : Node(name)
     std::string child_link_id;
     this->declare_parameter(CONF_CHILD_LINK, CONF_CHILD_LINK_DEFAULT);
     this->get_parameter(CONF_CHILD_LINK, child_link_id);
-    m_child_link_id = m_cg_link_id;//m_tf_prefix + child_link_id;
+    m_child_link_id = m_cg_link_id;//m_tf_prefix +s child_link_id;
+    // m_child_link_id = m_tf_prefix + child_link_id;
 
     // Read configuration: world link
     this->declare_parameter(CONF_WORLD_LINK, CONF_WORLD_LINK_DEFAULT);
@@ -577,7 +578,7 @@ bool MvpControlROS::f_compute_process_values() {
             orientation(DOF::YAW)
         );
 
-        // convert linear velocity from odomtery to cg_link
+        // convert linear velocity from odomtery child frame to cg_link
         Eigen::Vector3d uvw;
         uvw(0) = m_odometry_msg.twist.twist.linear.x;
         uvw(1) = m_odometry_msg.twist.twist.linear.y;
@@ -1260,12 +1261,56 @@ bool MvpControlROS::f_amend_set_point(
     m_set_point(mvp_msgs::msg::ControlMode::DOF_ROLL) = rpy_world.x();
     m_set_point(mvp_msgs::msg::ControlMode::DOF_PITCH) = rpy_world.y();
     m_set_point(mvp_msgs::msg::ControlMode::DOF_YAW) = rpy_world.z();
-    m_set_point(mvp_msgs::msg::ControlMode::DOF_U) = set_point->velocity.x;
-    m_set_point(mvp_msgs::msg::ControlMode::DOF_V) = set_point->velocity.y;
-    m_set_point(mvp_msgs::msg::ControlMode::DOF_W) = set_point->velocity.z;
-    m_set_point(mvp_msgs::msg::ControlMode::DOF_P) = set_point->angular_rate.x;
-    m_set_point(mvp_msgs::msg::ControlMode::DOF_Q) = set_point->angular_rate.y;
-    m_set_point(mvp_msgs::msg::ControlMode::DOF_R) = set_point->angular_rate.z;
+
+    Eigen::Vector3d vel_child, omega_child;
+    
+    //converts setpoint velocity into the controller child frame.
+    try {
+        // Transform the position of setpoint frame_id to world_link
+        geometry_msgs::msg::TransformStamped tf_two_childs = m_transform_buffer->lookupTransform(
+            m_child_link_id,
+            set_point->child_frame_id,
+            tf2::TimePointZero,
+            10ms
+        );
+
+        auto tf_two_child_eigen = tf2::transformToEigen(tf_two_childs);
+        //convert linear velocity
+        vel_child = tf_two_child_eigen.rotation() * 
+                                Eigen::Vector3d(set_point->velocity.x, set_point->velocity.y, set_point->velocity.z);
+
+        //convert angular velocity
+        tf2::Quaternion quat;
+            quat.setW(tf_two_childs.transform.rotation.w);
+            quat.setX(tf_two_childs.transform.rotation.x);
+            quat.setY(tf_two_childs.transform.rotation.y);
+            quat.setZ(tf_two_childs.transform.rotation.z);
+
+            Eigen::VectorXd process_values = Eigen::VectorXd::Zero(CONTROLLABLE_DOF_LENGTH);
+            tf2::Matrix3x3(quat).getRPY(
+                process_values(DOF::ROLL),
+                process_values(DOF::PITCH),
+                process_values(DOF::YAW)
+            );
+
+        Eigen::Matrix3d ang_vel_tranform = Eigen::Matrix3d::Identity();
+        ang_vel_tranform = f_angular_velocity_transform(process_values);
+        omega_child = ang_vel_tranform * 
+                        Eigen::Vector3d(set_point->angular_rate.x, set_point->angular_rate.y, set_point->angular_rate.z);
+
+
+    } catch(tf2::TransformException &e) {
+        RCLCPP_WARN_STREAM_THROTTLE(this->get_logger(), steady_clock, 10, std::string("Can't transform child links") + e.what());
+        return false;
+    }
+
+
+    m_set_point(mvp_msgs::msg::ControlMode::DOF_U) = vel_child.x();
+    m_set_point(mvp_msgs::msg::ControlMode::DOF_V) = vel_child.y();
+    m_set_point(mvp_msgs::msg::ControlMode::DOF_W) = vel_child.z();
+    m_set_point(mvp_msgs::msg::ControlMode::DOF_P) = omega_child.x();
+    m_set_point(mvp_msgs::msg::ControlMode::DOF_Q) = omega_child.y();
+    m_set_point(mvp_msgs::msg::ControlMode::DOF_R) = omega_child.z();
 
     m_mvp_control->update_desired_state(m_set_point);
 
