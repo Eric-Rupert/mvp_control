@@ -42,6 +42,7 @@
 
 #include "std_msgs/msg/float32.hpp"
 #include "std_srvs/srv/empty.hpp"
+#include "std_srvs/srv/trigger.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 // #include "dynamic_reconfigure/server.h"
 
@@ -178,6 +179,10 @@ namespace ctrl {
         //! @brief Disable controller ros service server
         // ros::ServiceServer m_disable_controller_server;
         rclcpp::Service<std_srvs::srv::Empty>::SharedPtr m_disable_controller_server;
+
+        //! @brief Get current controller state enabled or disabled
+        // ros::ServiceServer m_get_controller_state_server;
+        rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr m_get_controller_state_server;
 
         //! @brief Active mode getter ros service server
         // ros::ServiceServer m_get_active_mode_server;
@@ -382,6 +387,21 @@ namespace ctrl {
         bool f_cb_srv_disable(
             const std::shared_ptr<std_srvs::srv::Empty::Request> req,
             const std::shared_ptr<std_srvs::srv::Empty::Response> resp);
+
+        /**
+         * @brief get controller state
+         *
+         * @param req Trivial empty request
+         * @param resp Trivial empty response
+         * @return true
+         * @return false
+         */
+        bool f_cb_srv_get_controller_state(
+            const std::shared_ptr<std_srvs::srv::Trigger::Request> req,
+            const std::shared_ptr<std_srvs::srv::Trigger::Response> resp);
+
+        
+
 
         /**
          * @brief Get active control mode

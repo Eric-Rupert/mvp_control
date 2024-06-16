@@ -92,6 +92,7 @@ namespace ctrl {
     static constexpr const char * SERVICE_GET_CONTROL_MODES = "controller/get_modes";
     static constexpr const char * SERVICE_SET_CONTROL_POINT = "controller/set_point";
     static constexpr const char * SERVICE_GET_ACTIVE_MODE = "controller/active_mode";
+    static constexpr const char * SERVICE_GET_CONTROLLER_STATE = "controller/get_state";
 
     struct DOF {
         //! @NOTE: ROLL_RATE, PITCH_RATE, YAW_RATE are controlle in global frame

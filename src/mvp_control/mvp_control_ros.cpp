@@ -140,10 +140,17 @@ MvpControlROS::MvpControlROS(std::string name) : Node(name)
         SERVICE_CONTROL_ENABLE,
         std::bind(&MvpControlROS::f_cb_srv_enable, this, _1, _2)
         );
+
     m_disable_controller_server = this->create_service<std_srvs::srv::Empty>(
         SERVICE_CONTROL_DISABLE,
         std::bind(&MvpControlROS::f_cb_srv_disable, this, _1, _2)
         );
+
+    m_get_controller_state_server = this->create_service<std_srvs::srv::Trigger>(
+        SERVICE_GET_CONTROLLER_STATE,
+        std::bind(&MvpControlROS::f_cb_srv_get_controller_state, this, _1, _2)
+        );
+
 
     m_get_active_mode_server = this->create_service<GetControlMode>(
         SERVICE_GET_ACTIVE_MODE,
@@ -156,6 +163,22 @@ MvpControlROS::MvpControlROS(std::string name) : Node(name)
     m_mvp_control.reset(new MvpControl());
 
 }
+
+
+bool MvpControlROS::f_cb_srv_get_controller_state(
+        const std::shared_ptr<std_srvs::srv::Trigger::Request> req,
+        const std::shared_ptr<std_srvs::srv::Trigger::Response> resp) {
+    resp->success = true;
+    if(m_enabled){
+         resp->message = "enabled";
+    }
+    else{
+        resp->message = "disabled";
+    }
+
+    return true;
+}
+
 
 void MvpControlROS::f_generate_control_allocation_matrix() {
 
