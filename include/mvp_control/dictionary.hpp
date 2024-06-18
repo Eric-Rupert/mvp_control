@@ -79,6 +79,7 @@ namespace ctrl {
     static constexpr const char * CONF_CONTROL_ALLOCATION_MATRIX = "control_allocation_matrix";
     static constexpr const char * CONF_CONTROL_TF = "control_tf";
     static constexpr const char * CONF_CONTROLLER_FREQUENCY = "controller_frequency";
+    static constexpr const char * CONF_NO_SETPOINT_TIMEOUT = "controller_no_setpoint_timeout";
 
 
     static constexpr const char * TOPIC_SAFETY = "safety";

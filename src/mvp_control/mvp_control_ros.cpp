@@ -98,6 +98,9 @@ MvpControlROS::MvpControlROS(std::string name) : Node(name)
     this->declare_parameter(CONF_CONTROLLER_FREQUENCY, 10.0);
     this->get_parameter(CONF_CONTROLLER_FREQUENCY, m_controller_frequency);
 
+    this->declare_parameter(CONF_NO_SETPOINT_TIMEOUT, 10.0);
+    this->get_parameter(CONF_NO_SETPOINT_TIMEOUT, m_no_setpoint_timeout);
+
     //control config file location
     this->declare_parameter("config_file", "control.yaml");
     this->get_parameter("config_file", m_control_config_file);
@@ -661,14 +664,21 @@ bool MvpControlROS::f_compute_process_values() {
 void MvpControlROS::f_control_loop() {
 
     double pt = rclcpp::Clock(RCL_ROS_TIME).now().nanoseconds() / 1000000000.0;
+    setpoint_timer = rclcpp::Clock(RCL_ROS_TIME).now().nanoseconds() / 1000000000.0;
+
     auto r = rclcpp::Rate(m_controller_frequency);
 
     while(rclcpp::ok()) {
-
         /**
          * Thread may not be able to sleep properly. This may happen using
          * simulated time.
          */
+        /**
+         * Record the time that loop ends. Later, it will feed the PID
+         * controller.
+         */
+        pt = rclcpp::Clock(RCL_ROS_TIME).now().nanoseconds() / 1000000000.0;
+
         if(!r.sleep()) {
             continue;
         }
@@ -676,7 +686,9 @@ void MvpControlROS::f_control_loop() {
         /**
          * Check if controller is enabled or not.
          */
-        if(!m_enabled) {
+        double time_since_last_setpoint = pt - setpoint_timer;
+        
+        if(!m_enabled || time_since_last_setpoint > m_no_setpoint_timeout) {
              for(uint64_t i = 0 ; i < m_thrusters.size() ; i++) {
                 // m_thrusters.at(i)->command(0);
                 std_msgs::msg::Float64 msg;
@@ -733,11 +745,11 @@ void MvpControlROS::f_control_loop() {
 
         }
 
-        /**
-         * Record the time that loop ends. Later, it will feed the PID
-         * controller.
-         */
-        pt = rclcpp::Clock(RCL_ROS_TIME).now().nanoseconds() / 1000000000.0;
+        // /**
+        //  * Record the time that loop ends. Later, it will feed the PID
+        //  * controller.
+        //  */
+        // pt = rclcpp::Clock(RCL_ROS_TIME).now().nanoseconds() / 1000000000.0;
     }
 }
 
@@ -750,6 +762,7 @@ void MvpControlROS::f_cb_msg_odometry(
 
 void MvpControlROS::f_cb_srv_set_point(
     const mvp_msgs::msg::ControlProcess::SharedPtr msg) {
+    setpoint_timer = rclcpp::Clock(RCL_ROS_TIME).now().nanoseconds() / 1000000000.0;
     f_amend_set_point(msg);
 }
 
