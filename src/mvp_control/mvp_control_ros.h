@@ -164,6 +164,9 @@ namespace ctrl {
         //! @brief Active mode getter ros service server
         ros::ServiceServer m_get_active_mode_server;
 
+        //! @brief reset intergal error server
+        ros::ServiceServer m_reset_integral_error_server;
+
         //! @brief Trivial subscriber
         ros::Subscriber m_odometry_subscriber;
 
@@ -355,6 +358,14 @@ namespace ctrl {
             std_srvs::Empty::Request req,
             std_srvs::Empty::Response resp);
 
+
+        /**
+         * @brief reset the integral error in PID controller
+        */
+        bool f_cb_srv_reset_integral_error(
+            std_srvs::Empty::Request req,
+            std_srvs::Empty::Response resp);
+            
         /**
          * @brief get controller state (on/off)
          *
