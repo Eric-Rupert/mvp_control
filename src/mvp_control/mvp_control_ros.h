@@ -43,6 +43,7 @@
 #include "std_msgs/Float32.h"
 #include "std_srvs/Empty.h"
 #include "std_srvs/Trigger.h"
+#include "std_msgs/Bool.h"
 #include "nav_msgs/Odometry.h"
 #include "dynamic_reconfigure/server.h"
 #include "geometry_msgs/PoseStamped.h"
@@ -178,6 +179,10 @@ namespace ctrl {
 
         //! @brief Publishes process error publisher
         ros::Publisher m_process_error_publisher;
+
+
+        //! @brief Controller state publisher
+        ros::Publisher m_controller_state_publisher;
 
         //! @brief Holder for latest odometry msg
         nav_msgs::Odometry m_odometry_msg;

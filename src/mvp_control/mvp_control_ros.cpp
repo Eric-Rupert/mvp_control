@@ -117,6 +117,11 @@ MvpControlROS::MvpControlROS()
         100
     );
 
+    m_controller_state_publisher = m_nh.advertise<std_msgs::Bool>(
+        TOPIC_CONTROLLER_STATE,
+        100
+    );
+
     /**
      * Initialize services
      */
@@ -1276,7 +1281,10 @@ bool MvpControlROS::f_cb_srv_enable(
 
     // std::cout << "m_i:\n" << m_i << std::endl;
     m_enabled = true;
+    std_msgs::Bool controller_state;
+    controller_state.data=m_enabled;
 
+    m_controller_state_publisher.publish(controller_state);
     return true;
 }
 
@@ -1286,7 +1294,9 @@ bool MvpControlROS::f_cb_srv_disable(
 
     ROS_INFO("Controller disabled!");
     m_enabled = false;
-
+    std_msgs::Bool controller_state;
+    controller_state.data=m_enabled;
+    m_controller_state_publisher.publish(controller_state);
     return true;
 }
 
