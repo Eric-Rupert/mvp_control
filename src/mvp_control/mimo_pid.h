@@ -155,12 +155,24 @@ namespace ctrl {
         auto get_i_min() -> decltype(m_i_min);
 
         /*! @brief Default setter for min
-         *
-         * @param gain
-         */
+        *
+        * @param gain
+        */
         void set_i_min(const decltype(m_i_min) &gain);
 
-        //! @brief Default getter for error function
+        /*! @brief Resets the integral term to zero */
+        void reset_m_i(const decltype(m_i));
+
+        /*! @brief Retrieves the current integral term
+        *
+        * @return The current value of m_i
+        */
+        auto get_m_i() -> decltype(m_i);
+
+        /*! @brief Default getter for error function
+        *
+        * @return The current error function
+        */
         auto get_error_function() -> decltype(m_error_function);
 
         /*! @brief Default setter for error function

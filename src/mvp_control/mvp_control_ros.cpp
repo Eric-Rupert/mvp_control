@@ -137,6 +137,11 @@ MvpControlROS::MvpControlROS()
         100
     );
 
+    m_controller_state_publisher = m_nh.advertise<std_msgs::Bool>(
+        TOPIC_CONTROLLER_STATE,
+        100
+    );
+
     /**
      * Initialize services
      */
@@ -186,6 +191,19 @@ MvpControlROS::MvpControlROS()
         SERVICE_CONTROL_DISABLE,
         std::bind(
             &MvpControlROS::f_cb_srv_disable,
+            this,
+            std::placeholders::_1,
+            std::placeholders::_2
+        )
+    );
+
+    m_reset_integral_error_server = m_nh.advertiseService
+        <std_srvs::Empty::Request,
+        std_srvs::Empty::Response>
+    (
+        SERVICE_RESET_INTEGRAL_ERROR,
+        std::bind(
+            &MvpControlROS::f_cb_srv_reset_integral_error,
             this,
             std::placeholders::_1,
             std::placeholders::_2
@@ -1671,12 +1689,33 @@ bool MvpControlROS::f_cb_srv_set_control_point(
     return f_amend_set_point(req.setpoint);
 }
 
+bool MvpControlROS::f_cb_srv_reset_integral_error(
+        std_srvs::Empty::Request req, std_srvs::Empty::Response res) {
+
+    Eigen::VectorXd m_i(CONTROLLABLE_DOF_LENGTH);   
+    m_i.setZero();
+    m_mvp_control->get_pid()->reset_m_i(m_i);
+    ROS_INFO("MVP_control PID integral errors are set to zero!");
+    return true;
+}
+
 bool MvpControlROS::f_cb_srv_enable(
         std_srvs::Empty::Request req, std_srvs::Empty::Response res) {
 
     ROS_INFO("Controller enabled!");
-    m_enabled = true;
+    // m_mvp_control->m_pid->m_i.setZero();
 
+    Eigen::VectorXd m_i(CONTROLLABLE_DOF_LENGTH);
+    m_i.setZero();
+    m_mvp_control->get_pid()->reset_m_i(m_i);
+    // m_i = m_mvp_control->get_pid()->get_m_i();
+
+    // std::cout << "m_i:\n" << m_i << std::endl;
+    m_enabled = true;
+    std_msgs::Bool controller_state;
+    controller_state.data=m_enabled;
+
+    m_controller_state_publisher.publish(controller_state);
     return true;
 }
 
@@ -1685,7 +1724,9 @@ bool MvpControlROS::f_cb_srv_disable(
 
     ROS_INFO("Controller disabled!");
     m_enabled = false;
-
+    std_msgs::Bool controller_state;
+    controller_state.data=m_enabled;
+    m_controller_state_publisher.publish(controller_state);
     return true;
 }
 

@@ -95,6 +95,7 @@ namespace ctrl {
     static constexpr const char * TOPIC_CONTROL_PROCESS_VALUE = "controller/process/value";
     static constexpr const char * TOPIC_CONTROL_PROCESS_SET_POINT = "controller/process/set_point";
     static constexpr const char * TOPIC_CONTROL_PROCESS_ERROR = "controller/process/error";
+    static constexpr const char * TOPIC_CONTROLLER_STATE = "controller/state";
 
     static constexpr const char * SERVICE_CONTROL_ENABLE = "controller/enable";
     static constexpr const char * SERVICE_CONTROL_DISABLE = "controller/disable";
@@ -102,7 +103,7 @@ namespace ctrl {
     static constexpr const char * SERVICE_GET_CONTROL_MODES = "controller/get_modes";
     static constexpr const char * SERVICE_SET_CONTROL_POINT = "controller/set_point";
     static constexpr const char * SERVICE_GET_ACTIVE_MODE = "controller/active_mode";
-
+    static constexpr const char * SERVICE_RESET_INTEGRAL_ERROR = "controller/reset_integral_error";
     struct DOF {
         //! @NOTE: ROLL_RATE, PITCH_RATE, YAW_RATE are controlle in global frame
         enum IDX : int {

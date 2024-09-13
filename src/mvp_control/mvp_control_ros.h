@@ -49,6 +49,7 @@
 #include "std_msgs/Float32.h"
 #include "std_srvs/Empty.h"
 #include "std_srvs/Trigger.h"
+#include "std_msgs/Bool.h"
 #include "nav_msgs/Odometry.h"
 #include "dynamic_reconfigure/server.h"
 
@@ -184,6 +185,9 @@ namespace ctrl {
         //! @brief Active mode getter ros service server
         ros::ServiceServer m_get_active_mode_server;
 
+        //! @brief reset intergal error server
+        ros::ServiceServer m_reset_integral_error_server;
+
         //! @brief Trivial subscriber
         ros::Subscriber m_odometry_subscriber;
 
@@ -205,6 +209,9 @@ namespace ctrl {
 
         //! @brief Publishes process error publisher
         ros::Publisher m_process_error_publisher;
+
+        //! @brief Controller state publisher
+        ros::Publisher m_controller_state_publisher;
 
         //! @brief Holder for latest odometry msg
         nav_msgs::Odometry m_odometry_msg;
@@ -416,6 +423,13 @@ namespace ctrl {
          * @return false
          */
         bool f_cb_srv_disable(
+            std_srvs::Empty::Request req,
+            std_srvs::Empty::Response resp);
+
+        /**
+         * @brief reset the integral error in PID controller
+        */
+        bool f_cb_srv_reset_integral_error(
             std_srvs::Empty::Request req,
             std_srvs::Empty::Response resp);
 
