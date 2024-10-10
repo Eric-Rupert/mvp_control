@@ -663,8 +663,8 @@ bool MvpControlROS::f_compute_process_values() {
 
 void MvpControlROS::f_control_loop() {
 
-    double pt = rclcpp::Clock(RCL_ROS_TIME).now().nanoseconds() / 1000000000.0;
-    setpoint_timer = rclcpp::Clock(RCL_ROS_TIME).now().nanoseconds() / 1000000000.0;
+    double pt = rclcpp::Clock(RCL_ROS_TIME).now().seconds();
+    // setpoint_timer = rclcpp::Clock(RCL_ROS_TIME).now().nanoseconds() / 1000000000.0;
 
     auto r = rclcpp::Rate(m_controller_frequency);
 
@@ -677,24 +677,8 @@ void MvpControlROS::f_control_loop() {
          * Record the time that loop ends. Later, it will feed the PID
          * controller.
          */
-        pt = rclcpp::Clock(RCL_ROS_TIME).now().nanoseconds() / 1000000000.0;
 
         if(!r.sleep()) {
-            continue;
-        }
-
-        /**
-         * Check if controller is enabled or not.
-         */
-        double time_since_last_setpoint = pt - setpoint_timer;
-        
-        if(!m_enabled || time_since_last_setpoint > m_no_setpoint_timeout) {
-             for(uint64_t i = 0 ; i < m_thrusters.size() ; i++) {
-                // m_thrusters.at(i)->command(0);
-                std_msgs::msg::Float64 msg;
-                msg.data = 0.0;
-                m_thrusters.at(i)->m_thrust_publisher->publish(msg);
-            }
             continue;
         }
 
@@ -705,13 +689,31 @@ void MvpControlROS::f_control_loop() {
         if(not f_compute_process_values()) {
             continue;
         }
+        /**
+         * Check if controller is enabled or not.
+         */
+        
+        double time_since_last_setpoint = rclcpp::Clock(RCL_ROS_TIME).now().seconds() - setpoint_timer;
+        // printf("setpoint_timer=%lf\r\n", setpoint_timer);
+        // printf("time since last setpoint = %lf\r\n", time_since_last_setpoint);
+        if(!m_enabled || time_since_last_setpoint > m_no_setpoint_timeout) {
+             for(uint64_t i = 0 ; i < m_thrusters.size() ; i++) {
+                // m_thrusters.at(i)->command(0);
+                std_msgs::msg::Float64 msg;
+                msg.data = 0.0;
+                m_thrusters.at(i)->m_thrust_publisher->publish(msg);
+            }
+            continue;
+        }
+
+        
 
         Eigen::VectorXd needed_forces;
 
         /**
          * Get time difference to feed PID controller
          */
-        double dt = rclcpp::Clock(RCL_ROS_TIME).now().nanoseconds() / 1000000000.0 - pt;
+        double dt = rclcpp::Clock(RCL_ROS_TIME).now().seconds() - pt;
         
         /**
          * Calculate forces to be requested from thrusters. If operation fails,
@@ -749,7 +751,7 @@ void MvpControlROS::f_control_loop() {
         //  * Record the time that loop ends. Later, it will feed the PID
         //  * controller.
         //  */
-        // pt = rclcpp::Clock(RCL_ROS_TIME).now().nanoseconds() / 1000000000.0;
+        pt = rclcpp::Clock(RCL_ROS_TIME).now().seconds();
     }
 }
 
@@ -762,7 +764,9 @@ void MvpControlROS::f_cb_msg_odometry(
 
 void MvpControlROS::f_cb_srv_set_point(
     const mvp_msgs::msg::ControlProcess::SharedPtr msg) {
-    setpoint_timer = rclcpp::Clock(RCL_ROS_TIME).now().nanoseconds() / 1000000000.0;
+
+    // printf("got setpoint msgs\r\n");
+    setpoint_timer = rclcpp::Clock(RCL_ROS_TIME).now().seconds();
     f_amend_set_point(msg);
 }
 
