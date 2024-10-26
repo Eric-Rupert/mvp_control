@@ -162,6 +162,8 @@ namespace ctrl {
 
         void reset_m_i(const decltype(m_i));
 
+        void set_m_i(const decltype(m_i) &new_m_i);
+
         auto get_m_i() -> decltype(m_i);
 
 

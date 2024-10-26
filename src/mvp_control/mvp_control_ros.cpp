@@ -1557,66 +1557,6 @@ bool MvpControlROS::f_amend_set_point(
             return false;
         }
 
-        // if (abs(tf_world_setpoint.header.stamp.toSec() - ros::Time::now().toSec()) < 10 || tf_world_setpoint.header.stamp.toSec()==0.0) 
-        // { 
-            
-        //     auto tf_eigen = tf2::transformToEigen(tf_world_setpoint);
-
-        //     p_world2 = tf_eigen.rotation() * 
-        //                             Eigen::Vector3d(set_point.position.x, set_point.position.y, set_point.position.z)
-        //                             + tf_eigen.translation();
-        //     ///convert euler angle into a different frame
-        //     ///find the rotation matrix from the set point frame to the desired pose.
-        //     Eigen::Matrix3d R;
-        //     R = Eigen::AngleAxisd(set_point.orientation.z, Eigen::Vector3d::UnitZ()) *
-        //                         Eigen::AngleAxisd(set_point.orientation.y, Eigen::Vector3d::UnitY()) *
-        //                         Eigen::AngleAxisd(set_point.orientation.x, Eigen::Vector3d::UnitX());
-       
-        //     //find rotation matrix from the world link to the setpoint frame.
-        //     auto tf_1 = m_transform_buffer.lookupTransform(
-        //         set_point.header.frame_id,
-        //         m_world_link_id,
-        //         ros::Time(0)
-        //     );
-
-        //     if (abs(tf_1.header.stamp.toSec() - ros::Time::now().toSec()) < 10 || tf_1.header.stamp.toSec()==0.0) 
-        //     { 
-            
-        //         auto tf_1_eigen = tf2::transformToEigen(tf_1);
-        //         //find the total rotation matrix from the world link to the desired pose.
-        //         Eigen::Matrix3d R_set_point =  tf_1_eigen.rotation() *R;
-        //         // Eigen::Vector3d euler_angles = R_set_point.eulerAngles(2,1,0); // ZYX order
-        //         // rpy_world.z() = euler_angles[0];
-        //         // rpy_world.y() = euler_angles[1];
-        //         // rpy_world.x() = euler_angles[2];
-
-        //         // printf("from eigen: %lf, %lf, %lf\r\n",rpy_world.x(), rpy_world.y(), rpy_world.z());
-
-        //         //pitch angle
-        //         rpy_world2.y() = asin(-R_set_point(2, 0));
-
-        //         // Calculate yaw (rotation about Z-axis)
-        //         rpy_world2.z() = atan2(R_set_point(1, 0), R_set_point(0, 0));
-
-        //         // Calculate roll (rotation about X-axis)
-        //         rpy_world2.x() = atan2(R_set_point(2, 1), R_set_point(2, 2));
-
-        //         // printf("from code: %lf, %lf, %lf\r\n",rpy_world.x(), rpy_world.y(), rpy_world.z());
-        //         std::cout<<"original xyz =\n"<<p_world2<<std::endl;
-        //         std::cout<<"original rpy =\n"<<rpy_world2<<std::endl;
-        //     }
-        //     else
-        //     {
-        //         ROS_WARN( "%s to %s TF too old!", set_point.header.frame_id.c_str(), m_world_link_id.c_str() );
-        //         return false;
-        //     }
-        // }
-        // else
-        // {
-        //     ROS_WARN( "%s to %s TF too old!", m_world_link_id.c_str(), set_point.header.frame_id.c_str() );
-        //     return false;
-        // }
-
         //assume the set point uvw and pqr are in the m_cg_link_id
 
     } catch(tf2::TransformException &e) {
@@ -1624,30 +1564,46 @@ bool MvpControlROS::f_amend_set_point(
         return false;
     }
 
-    m_set_point(mvp_msgs::ControlMode::DOF_X) =
+    //reset integral term if there is setpoint change
+    Eigen::VectorXd m_i(CONTROLLABLE_DOF_LENGTH);   
+    m_i = m_mvp_control->get_pid()->get_m_i();
+    
+    Eigen::VectorXd new_set_point(CONTROLLABLE_DOF_LENGTH);
+
+    new_set_point(mvp_msgs::ControlMode::DOF_X) =
         p_world.x();
-    m_set_point(mvp_msgs::ControlMode::DOF_Y) =
+    new_set_point(mvp_msgs::ControlMode::DOF_Y) =
         p_world.y();
-    m_set_point(mvp_msgs::ControlMode::DOF_Z) =
+    new_set_point(mvp_msgs::ControlMode::DOF_Z) =
         p_world.z();
-    m_set_point(mvp_msgs::ControlMode::DOF_ROLL) =
+    new_set_point(mvp_msgs::ControlMode::DOF_ROLL) =
         rpy_world.x();
-    m_set_point(mvp_msgs::ControlMode::DOF_PITCH) =
+    new_set_point(mvp_msgs::ControlMode::DOF_PITCH) =
         rpy_world.y();
-    m_set_point(mvp_msgs::ControlMode::DOF_YAW) =
+    new_set_point(mvp_msgs::ControlMode::DOF_YAW) =
         rpy_world.z();
-    m_set_point(mvp_msgs::ControlMode::DOF_SURGE) =
+    new_set_point(mvp_msgs::ControlMode::DOF_SURGE) =
         set_point.velocity.x;
-    m_set_point(mvp_msgs::ControlMode::DOF_SWAY) =
+    new_set_point(mvp_msgs::ControlMode::DOF_SWAY) =
         set_point.velocity.y;
-    m_set_point(mvp_msgs::ControlMode::DOF_HEAVE) =
+    new_set_point(mvp_msgs::ControlMode::DOF_HEAVE) =
         set_point.velocity.z;
-    m_set_point(mvp_msgs::ControlMode::DOF_ROLL_RATE) =
+    new_set_point(mvp_msgs::ControlMode::DOF_ROLL_RATE) =
         set_point.angular_rate.x;
-    m_set_point(mvp_msgs::ControlMode::DOF_PITCH_RATE) =
+    new_set_point(mvp_msgs::ControlMode::DOF_PITCH_RATE) =
         set_point.angular_rate.y;
-    m_set_point(mvp_msgs::ControlMode::DOF_YAW_RATE) =
+    new_set_point(mvp_msgs::ControlMode::DOF_YAW_RATE) =
         set_point.angular_rate.z;
+
+    //reset the integral for the DOF that has changed setpoint.
+    for (int i = 0; i < m_set_point.size(); ++i) {
+        if (m_set_point[i] != new_set_point[i]) {
+            m_i[i] = 0;
+        }
+    }
+
+    m_mvp_control->get_pid()->set_m_i(m_i);
+    m_set_point = new_set_point;
 
     m_mvp_control->update_desired_state(m_set_point);
 

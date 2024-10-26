@@ -44,6 +44,11 @@ bool MimoPID::calculate(Eigen::VectorXd* u, const Eigen::ArrayXd& desired, const
 
     // Proportional term
     Eigen::ArrayXd p = m_kp * error;
+    // for(int i = 0; i<m_i.size(); i++)
+    // {
+    //     printf("integration[%d]=%lf\r\n", i, m_i[i]);
+
+    // }
 
     m_i += m_ki * (error * dt);
 
@@ -119,6 +124,12 @@ auto MimoPID::get_i_min() -> decltype(m_i_max) {
 
 void MimoPID::reset_m_i(const decltype(m_i)) {
     m_i.setZero();
+}
+
+
+void MimoPID::set_m_i(const decltype(m_i) &new_m_i)
+{
+    m_i = new_m_i;
 }
 
 auto MimoPID::get_m_i() -> decltype(m_i) {
