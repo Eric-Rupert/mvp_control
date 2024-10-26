@@ -27,7 +27,7 @@
 using namespace ctrl;
 
 MimoPID::MimoPID() : m_error_function(nullptr) , m_dt_i(10000){
-
+     m_i.setZero();
 }
 
 bool MimoPID::calculate(Eigen::VectorXd* u, const Eigen::ArrayXd& desired, const Eigen::ArrayXd& current, double dt) {
@@ -40,20 +40,18 @@ bool MimoPID::calculate(Eigen::VectorXd* u, const Eigen::ArrayXd& desired, const
 
     if(m_i.size() == 0) {
         m_i.resize(error.size());
+        printf("errorsize = %d\r\n", error.size());
     }
 
     // Proportional term
     Eigen::ArrayXd p = m_kp * error;
-    // for(int i = 0; i<m_i.size(); i++)
-    // {
-    //     printf("integration[%d]=%lf\r\n", i, m_i[i]);
+    
 
-    // }
+    Eigen::ArrayXd delta_i;
+    delta_i = m_ki * (error * dt);
 
-    m_i += m_ki * (error * dt);
-
-    m_i = (m_i > m_i_max).select(m_i_max, m_i);
-    m_i = (m_i < m_i_min).select(m_i_min, m_i);
+    // m_i = (m_i > m_i_max).select(m_i_max, m_i);
+    // m_i = (m_i < m_i_min).select(m_i_min, m_i);
 
     // Derivation term
     if(!m_pe.data()) {
@@ -65,7 +63,23 @@ bool MimoPID::calculate(Eigen::VectorXd* u, const Eigen::ArrayXd& desired, const
 
     m_pe = error;
 
-    *u = p + m_i + d;
+    Eigen::ArrayXd pid_sum = p + m_i + d;
+    
+    //saturation
+    pid_sum = (pid_sum > m_i_max).select(m_i_max, pid_sum);
+    pid_sum = (pid_sum < m_i_min).select(m_i_min, pid_sum);
+
+    //clamping only update the integral when not saturated
+    m_i = (pid_sum.array() > m_i_min.array() && pid_sum.array() < m_i_max.array())
+           .select(m_i + delta_i, m_i);
+    // *u = p + m_i + d;
+    *u = pid_sum;
+
+    // for(int i = 0; i<m_i.size(); i++)
+    // {
+    //     printf("integration[%d]=%lf, total =%lf\r\n", i, m_i[i], pid_sum[i]);
+
+    // }
 
     return true;
 }

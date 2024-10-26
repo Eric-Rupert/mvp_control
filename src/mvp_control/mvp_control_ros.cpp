@@ -1262,7 +1262,9 @@ bool MvpControlROS::f_cb_srv_reset_integral_error(
 
     Eigen::VectorXd m_i(CONTROLLABLE_DOF_LENGTH);   
     m_i.setZero();
-    m_mvp_control->get_pid()->reset_m_i(m_i);
+    // m_mvp_control->get_pid()->reset_m_i(m_i);
+    m_i.setZero();
+    m_mvp_control->get_pid()->set_m_i(m_i);
     ROS_INFO("MVP_control PID integral errors are set to zero!");
     return true;
 }
@@ -1276,8 +1278,8 @@ bool MvpControlROS::f_cb_srv_enable(
 
     Eigen::VectorXd m_i(CONTROLLABLE_DOF_LENGTH);
     m_i.setZero();
-    m_mvp_control->get_pid()->reset_m_i(m_i);
-    // m_i = m_mvp_control->get_pid()->get_m_i();
+    m_mvp_control->get_pid()->set_m_i(m_i);
+    m_i = m_mvp_control->get_pid()->get_m_i();
 
     // std::cout << "m_i:\n" << m_i << std::endl;
     m_enabled = true;
@@ -1565,8 +1567,8 @@ bool MvpControlROS::f_amend_set_point(
     }
 
     //reset integral term if there is setpoint change
-    Eigen::VectorXd m_i(CONTROLLABLE_DOF_LENGTH);   
-    m_i = m_mvp_control->get_pid()->get_m_i();
+    // Eigen::VectorXd m_i;   
+    auto m_i = m_mvp_control->get_pid()->get_m_i();
     
     Eigen::VectorXd new_set_point(CONTROLLABLE_DOF_LENGTH);
 
@@ -1595,6 +1597,9 @@ bool MvpControlROS::f_amend_set_point(
     new_set_point(mvp_msgs::ControlMode::DOF_YAW_RATE) =
         set_point.angular_rate.z;
 
+    // printf("setpoint size %d\r\n", new_set_point.size());
+    // printf("old setpoint size %d\r\n", m_set_point.size());
+    // printf("integral size %d\r\n", m_i.size());
     //reset the integral for the DOF that has changed setpoint.
     for (int i = 0; i < m_set_point.size(); ++i) {
         if (m_set_point[i] != new_set_point[i]) {
