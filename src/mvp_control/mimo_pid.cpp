@@ -63,11 +63,11 @@ bool MimoPID::calculate(Eigen::VectorXd* u, const Eigen::ArrayXd& desired, const
     Eigen::ArrayXd pid_sum = p + m_i + d;
     
     //saturation
-    pid_sum = (pid_sum > m_i_max).select(m_i_max, pid_sum);
-    pid_sum = (pid_sum < m_i_min).select(m_i_min, pid_sum);
+    pid_sum = (pid_sum > m_pid_max).select(m_pid_max, pid_sum);
+    pid_sum = (pid_sum < m_pid_min).select(m_pid_min, pid_sum);
 
     //clamping only update the integral when not saturated
-    m_i = (pid_sum.array() > m_i_min.array() && pid_sum.array() < m_i_max.array())
+    m_i = (pid_sum.array() > m_pid_min.array() && pid_sum.array() < m_pid_max.array())
            .select(m_i + delta_i, m_i);
     // *u = p + m_i + d;
     *u = pid_sum;
@@ -121,22 +121,21 @@ void MimoPID::set_dt_i(const decltype(m_dt_i) &gain) {
     m_dt_i = gain;
 }
 
-auto MimoPID::get_i_max() -> decltype(m_i_max) {
-    return m_i_max;
+auto MimoPID::get_pid_max() -> decltype(m_pid_max) {
+    return m_pid_max;
 }
 
-void MimoPID::set_i_max(const decltype(m_i_max) &gain) {
-    m_i_max= gain;
+void MimoPID::set_pid_max(const decltype(m_pid_max) &gain) {
+    m_pid_max= gain;
 }
 
-auto MimoPID::get_i_min() -> decltype(m_i_max) {
-    return m_i_min;
+auto MimoPID::get_pid_min() -> decltype(m_pid_min) {
+    return m_pid_min;
 }
 
-// void MimoPID::reset_m_i(const decltype(m_i)) {
-//     m_i.setZero();
-// }
-
+void MimoPID::set_pid_min(const decltype(m_pid_min) &gain) {
+    m_pid_min= gain;
+}
 
 void MimoPID::set_m_i(const decltype(m_i) &new_m_i)
 {
@@ -145,10 +144,6 @@ void MimoPID::set_m_i(const decltype(m_i) &new_m_i)
 
 auto MimoPID::get_m_i() -> decltype(m_i) {
     return m_i;
-}
-
-void MimoPID::set_i_min(const decltype(m_i_min) &gain) {
-    m_i_min= gain;
 }
 
 auto MimoPID::get_error_function() -> decltype(m_error_function) {

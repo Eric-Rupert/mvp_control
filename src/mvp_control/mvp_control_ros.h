@@ -362,14 +362,6 @@ namespace ctrl {
         bool f_cb_srv_disable(
             std_srvs::Empty::Request req,
             std_srvs::Empty::Response resp);
-
-
-        /**
-         * @brief reset the integral error in PID controller
-        */
-        // bool f_cb_srv_reset_integral_error(
-        //     std_srvs::Empty::Request req,
-        //     std_srvs::Empty::Response resp);
             
         /**
          * @brief get controller state (on/off)
