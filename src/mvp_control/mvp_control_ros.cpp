@@ -229,6 +229,12 @@ MvpControlROS::MvpControlROS()
      */
     m_mvp_control.reset(new MvpControl());
 
+    //set the integral terms to zeros
+    Eigen::VectorXd m_i(CONTROLLABLE_DOF_LENGTH);
+    m_i.setZero();
+    m_mvp_control->get_pid()->set_m_i(m_i);
+    m_i = m_mvp_control->get_pid()->get_m_i();
+
 }
 
 void MvpControlROS::f_generate_control_allocation_matrix() {

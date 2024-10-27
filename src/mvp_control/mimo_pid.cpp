@@ -40,7 +40,7 @@ bool MimoPID::calculate(Eigen::VectorXd* u, const Eigen::ArrayXd& desired, const
 
     if(m_i.size() == 0) {
         m_i.resize(error.size());
-        printf("errorsize = %d\r\n", error.size());
+        // printf("errorsize = %d\r\n", error.size());
     }
 
     // Proportional term
