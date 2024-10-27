@@ -160,7 +160,7 @@ namespace ctrl {
          */
         void set_i_min(const decltype(m_i_min) &gain);
 
-        void reset_m_i(const decltype(m_i));
+        // void reset_m_i(const decltype(m_i));
 
         void set_m_i(const decltype(m_i) &new_m_i);
 

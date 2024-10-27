@@ -50,9 +50,6 @@ bool MimoPID::calculate(Eigen::VectorXd* u, const Eigen::ArrayXd& desired, const
     Eigen::ArrayXd delta_i;
     delta_i = m_ki * (error * dt);
 
-    // m_i = (m_i > m_i_max).select(m_i_max, m_i);
-    // m_i = (m_i < m_i_min).select(m_i_min, m_i);
-
     // Derivation term
     if(!m_pe.data()) {
         m_pe = Eigen::VectorXd::Zero(error.size());
@@ -136,9 +133,9 @@ auto MimoPID::get_i_min() -> decltype(m_i_max) {
     return m_i_min;
 }
 
-void MimoPID::reset_m_i(const decltype(m_i)) {
-    m_i.setZero();
-}
+// void MimoPID::reset_m_i(const decltype(m_i)) {
+//     m_i.setZero();
+// }
 
 
 void MimoPID::set_m_i(const decltype(m_i) &new_m_i)
