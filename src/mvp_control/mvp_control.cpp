@@ -35,7 +35,7 @@ MvpControl::MvpControl() {
      * Initialize the error state
      */
     m_error_state = Eigen::VectorXd(CONTROLLABLE_DOF_LENGTH);
-
+    m_error_state.setZero();
     /**
      * Create the multiple input multiple output PID controller
      */

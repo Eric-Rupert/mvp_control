@@ -25,7 +25,7 @@
 #include "exception.hpp"
 #include "tf2_eigen/tf2_eigen.h"
 
-#include "mvp_control/dictionary.h"
+
 
 #include "boost/regex.hpp"
 

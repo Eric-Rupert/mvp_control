@@ -55,7 +55,7 @@
 #include "mvp_msgs/GetControlMode.h"
 #include "mvp_msgs/GetControlModes.h"
 #include "mvp_msgs/SetControlPoint.h"
-
+#include "mvp_control/dictionary.h"
 /*******************************************************************************
  * MVP
  */
