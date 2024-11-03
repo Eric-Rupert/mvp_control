@@ -162,6 +162,13 @@ MvpControlROS::MvpControlROS(std::string name) : Node(name)
     //  */
     m_mvp_control.reset(new MvpControl());
 
+    //set integral terms to zero
+    //set the integral terms to zeros
+    Eigen::VectorXd m_i(CONTROLLABLE_DOF_LENGTH);
+    m_i.setZero();
+    m_mvp_control->get_pid()->set_m_i(m_i);
+    // m_i = m_mvp_control->get_pid()->get_m_i();
+
 }
 
 
@@ -802,7 +809,7 @@ void MvpControlROS::f_load_control_config()
                 std::string dof_name = it->first.as<std::string>();
                 // printf("    dof_name = %s\r\n", dof_name.c_str());
                 //get PID values
-                for(const auto& key : {"p", "i", "d", "i_max", "i_min"})
+                for(const auto& key : {"p", "i", "d", "pid_max", "pid_min"})
                 {
                     param_name = "control_modes/" + mode + "/" + dof_name + "/" + key;
                     // printf("         param = %s\r\n", param_name.c_str());
@@ -814,64 +821,64 @@ void MvpControlROS::f_load_control_config()
                     this->get_parameter(param_name + CONF_PID_P, m.pid_x.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_x.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_x.kd);
-                    this->get_parameter(param_name + CONF_PID_I_MAX, m.pid_x.k_i_max);
-                    this->get_parameter(param_name + CONF_PID_I_MIN, m.pid_x.k_i_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_x.pid_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_x.pid_min);
                 }
                 if(dof_name.compare(CONF_DOF_Y) == 0){
                     param_name = "control_modes/" + mode + "/" + dof_name + "/";
                     this->get_parameter(param_name + CONF_PID_P, m.pid_y.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_y.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_y.kd);
-                    this->get_parameter(param_name + CONF_PID_I_MAX, m.pid_y.k_i_max);
-                    this->get_parameter(param_name + CONF_PID_I_MIN, m.pid_y.k_i_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_y.pid_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_y.pid_min);
                 }
                 if(dof_name.compare(CONF_DOF_Z) == 0){
                     param_name = "control_modes/" + mode + "/" + dof_name + "/";
                     this->get_parameter(param_name + CONF_PID_P, m.pid_z.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_z.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_z.kd);
-                    this->get_parameter(param_name + CONF_PID_I_MAX, m.pid_z.k_i_max);
-                    this->get_parameter(param_name + CONF_PID_I_MIN, m.pid_z.k_i_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_z.pid_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_z.pid_min);
                 }
                 if(dof_name.compare(CONF_DOF_ROLL) == 0){
                     param_name = "control_modes/" + mode + "/" + dof_name + "/";
                     this->get_parameter(param_name + CONF_PID_P, m.pid_roll.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_roll.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_roll.kd);
-                    this->get_parameter(param_name + CONF_PID_I_MAX, m.pid_roll.k_i_max);
-                    this->get_parameter(param_name + CONF_PID_I_MIN, m.pid_roll.k_i_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_roll.pid_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_roll.pid_min);
                 }
                 if(dof_name.compare(CONF_DOF_PITCH) == 0){
                     param_name = "control_modes/" + mode + "/" + dof_name + "/";
                     this->get_parameter(param_name + CONF_PID_P, m.pid_pitch.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_pitch.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_pitch.kd);
-                    this->get_parameter(param_name + CONF_PID_I_MAX, m.pid_pitch.k_i_max);
-                    this->get_parameter(param_name + CONF_PID_I_MIN, m.pid_pitch.k_i_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_pitch.pid_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_pitch.pid_min);
                 }
                 if(dof_name.compare(CONF_DOF_YAW) == 0){
                     param_name = "control_modes/" + mode + "/" + dof_name + "/";
                     this->get_parameter(param_name + CONF_PID_P, m.pid_yaw.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_yaw.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_yaw.kd);
-                    this->get_parameter(param_name + CONF_PID_I_MAX, m.pid_yaw.k_i_max);
-                    this->get_parameter(param_name + CONF_PID_I_MIN, m.pid_yaw.k_i_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_yaw.pid_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_yaw.pid_min);
                 }
                 if(dof_name.compare(CONF_DOF_U) == 0){
                     param_name = "control_modes/" + mode + "/" + dof_name + "/";
                     this->get_parameter(param_name + CONF_PID_P, m.pid_u.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_u.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_u.kd);
-                    this->get_parameter(param_name + CONF_PID_I_MAX, m.pid_u.k_i_max);
-                    this->get_parameter(param_name + CONF_PID_I_MIN, m.pid_u.k_i_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_u.pid_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_u.pid_min);
                 }
                 if(dof_name.compare(CONF_DOF_V) == 0){
                     param_name = "control_modes/" + mode + "/" + dof_name + "/";
                     this->get_parameter(param_name + CONF_PID_P, m.pid_v.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_v.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_v.kd);
-                    this->get_parameter(param_name + CONF_PID_I_MAX, m.pid_v.k_i_max);
-                    this->get_parameter(param_name + CONF_PID_I_MIN, m.pid_v.k_i_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_v.pid_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_v.pid_min);
                 }
 
                 if(dof_name.compare(CONF_DOF_P) == 0){
@@ -879,24 +886,24 @@ void MvpControlROS::f_load_control_config()
                     this->get_parameter(param_name + CONF_PID_P, m.pid_p.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_p.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_p.kd);
-                    this->get_parameter(param_name + CONF_PID_I_MAX, m.pid_p.k_i_max);
-                    this->get_parameter(param_name + CONF_PID_I_MIN, m.pid_p.k_i_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_p.pid_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_p.pid_min);
                 }
                 if(dof_name.compare(CONF_DOF_Q) == 0){
                     param_name = "control_modes/" + mode + "/" + dof_name + "/";
                     this->get_parameter(param_name + CONF_PID_P, m.pid_q.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_q.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_q.kd);
-                    this->get_parameter(param_name + CONF_PID_I_MAX, m.pid_q.k_i_max);
-                    this->get_parameter(param_name + CONF_PID_I_MIN, m.pid_q.k_i_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_q.pid_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_q.pid_min);
                 }
                 if(dof_name.compare(CONF_DOF_R) == 0){
                     param_name = "control_modes/" + mode + "/" + dof_name + "/";
                     this->get_parameter(param_name + CONF_PID_P, m.pid_r.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_r.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_r.kd);
-                    this->get_parameter(param_name + CONF_PID_I_MAX, m.pid_r.k_i_max);
-                    this->get_parameter(param_name + CONF_PID_I_MIN, m.pid_r.k_i_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_r.pid_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_r.pid_min);
                 }
                 //check dof enabled
                 auto found =std::find_if(CONF_DOF_LOOKUP.begin(), CONF_DOF_LOOKUP.end(),
@@ -1110,8 +1117,8 @@ bool MvpControlROS::f_amend_control_mode(std::string mode) {
         Eigen::VectorXd p(CONTROLLABLE_DOF_LENGTH);
         Eigen::VectorXd i(CONTROLLABLE_DOF_LENGTH);
         Eigen::VectorXd d(CONTROLLABLE_DOF_LENGTH);
-        Eigen::VectorXd i_max(CONTROLLABLE_DOF_LENGTH);
-        Eigen::VectorXd i_min(CONTROLLABLE_DOF_LENGTH);
+        Eigen::VectorXd pid_max(CONTROLLABLE_DOF_LENGTH);
+        Eigen::VectorXd pid_min(CONTROLLABLE_DOF_LENGTH);
 
         p <<
                 found->pid_x.kp,
@@ -1155,38 +1162,38 @@ bool MvpControlROS::f_amend_control_mode(std::string mode) {
                 found->pid_q.kd,
                 found->pid_r.kd;
 
-        i_max <<
-                found->pid_x.k_i_max,
-                found->pid_y.k_i_max,
-                found->pid_z.k_i_max,
-                found->pid_roll.k_i_max,
-                found->pid_pitch.k_i_max,
-                found->pid_yaw.k_i_max,
-                found->pid_u.k_i_max,
-                found->pid_v.k_i_max,
-                found->pid_w.k_i_max,
-                found->pid_p.k_i_max,
-                found->pid_q.k_i_max,
-                found->pid_r.k_i_max;
-        i_min <<
-                found->pid_x.k_i_min,
-                found->pid_y.k_i_min,
-                found->pid_z.k_i_min,
-                found->pid_roll.k_i_min,
-                found->pid_pitch.k_i_min,
-                found->pid_yaw.k_i_min,
-                found->pid_u.k_i_min,
-                found->pid_v.k_i_min,
-                found->pid_w.k_i_min,
-                found->pid_p.k_i_min,
-                found->pid_q.k_i_min,
-                found->pid_r.k_i_min;
+        pid_max <<
+                found->pid_x.pid_max,
+                found->pid_y.pid_max,
+                found->pid_z.pid_max,
+                found->pid_roll.pid_max,
+                found->pid_pitch.pid_max,
+                found->pid_yaw.pid_max,
+                found->pid_u.pid_max,
+                found->pid_v.pid_max,
+                found->pid_w.pid_max,
+                found->pid_p.pid_max,
+                found->pid_q.pid_max,
+                found->pid_r.pid_max;
+        pid_min <<
+                found->pid_x.pid_min,
+                found->pid_y.pid_min,
+                found->pid_z.pid_min,
+                found->pid_roll.pid_min,
+                found->pid_pitch.pid_min,
+                found->pid_yaw.pid_min,
+                found->pid_u.pid_min,
+                found->pid_v.pid_min,
+                found->pid_w.pid_min,
+                found->pid_p.pid_min,
+                found->pid_q.pid_min,
+                found->pid_r.pid_min;
 
         m_mvp_control->get_pid()->set_kp(p);
         m_mvp_control->get_pid()->set_ki(i);
         m_mvp_control->get_pid()->set_kd(d);
-        m_mvp_control->get_pid()->set_i_max(i_max);
-        m_mvp_control->get_pid()->set_i_min(i_min);
+        m_mvp_control->get_pid()->set_pid_max(pid_max);
+        m_mvp_control->get_pid()->set_pid_min(pid_min);
 
         m_control_mode = mode;
 
@@ -1220,6 +1227,10 @@ bool MvpControlROS::f_amend_set_point(
 
         return false;
     }
+
+    Eigen::VectorXd new_set_point(CONTROLLABLE_DOF_LENGTH);
+    Eigen::VectorXd m_i(CONTROLLABLE_DOF_LENGTH);
+    m_i = m_mvp_control->get_pid()->get_m_i();
 
     Eigen::Vector3d p_world, rpy_world;
     try {
@@ -1268,12 +1279,12 @@ bool MvpControlROS::f_amend_set_point(
         return false;
     }
 
-    m_set_point(mvp_msgs::msg::ControlMode::DOF_X) = p_world.x();
-    m_set_point(mvp_msgs::msg::ControlMode::DOF_Y) = p_world.y();
-    m_set_point(mvp_msgs::msg::ControlMode::DOF_Z) = p_world.z();
-    m_set_point(mvp_msgs::msg::ControlMode::DOF_ROLL) = rpy_world.x();
-    m_set_point(mvp_msgs::msg::ControlMode::DOF_PITCH) = rpy_world.y();
-    m_set_point(mvp_msgs::msg::ControlMode::DOF_YAW) = rpy_world.z();
+    new_set_point(mvp_msgs::msg::ControlMode::DOF_X) = p_world.x();
+    new_set_point(mvp_msgs::msg::ControlMode::DOF_Y) = p_world.y();
+    new_set_point(mvp_msgs::msg::ControlMode::DOF_Z) = p_world.z();
+    new_set_point(mvp_msgs::msg::ControlMode::DOF_ROLL) = rpy_world.x();
+    new_set_point(mvp_msgs::msg::ControlMode::DOF_PITCH) = rpy_world.y();
+    new_set_point(mvp_msgs::msg::ControlMode::DOF_YAW) = rpy_world.z();
 
     Eigen::Vector3d vel_child, omega_child;
     
@@ -1318,13 +1329,27 @@ bool MvpControlROS::f_amend_set_point(
     }
 
 
-    m_set_point(mvp_msgs::msg::ControlMode::DOF_U) = vel_child.x();
-    m_set_point(mvp_msgs::msg::ControlMode::DOF_V) = vel_child.y();
-    m_set_point(mvp_msgs::msg::ControlMode::DOF_W) = vel_child.z();
-    m_set_point(mvp_msgs::msg::ControlMode::DOF_P) = omega_child.x();
-    m_set_point(mvp_msgs::msg::ControlMode::DOF_Q) = omega_child.y();
-    m_set_point(mvp_msgs::msg::ControlMode::DOF_R) = omega_child.z();
+    new_set_point(mvp_msgs::msg::ControlMode::DOF_U) = vel_child.x();
+    new_set_point(mvp_msgs::msg::ControlMode::DOF_V) = vel_child.y();
+    new_set_point(mvp_msgs::msg::ControlMode::DOF_W) = vel_child.z();
+    new_set_point(mvp_msgs::msg::ControlMode::DOF_P) = omega_child.x();
+    new_set_point(mvp_msgs::msg::ControlMode::DOF_Q) = omega_child.y();
+    new_set_point(mvp_msgs::msg::ControlMode::DOF_R) = omega_child.z();
 
+    // printf("setpoint size %d\r\n", new_set_point.size());
+    // printf("old setpoint size %d\r\n", m_set_point.size());
+    // printf("integral size %d\r\n", m_i.size());
+
+    for (int i = 0; i< m_set_point.size(); ++i)
+    {
+        if(m_set_point[i] != new_set_point[i])
+        {
+            m_i[i]=0;
+        }
+    }
+
+    m_mvp_control->get_pid()->set_m_i(m_i);
+    m_set_point = new_set_point;
     m_mvp_control->update_desired_state(m_set_point);
 
     m_set_point_msg = *set_point;
