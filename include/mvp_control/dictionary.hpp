@@ -52,7 +52,6 @@ namespace ctrl {
     static constexpr const char * CONF_THRUSTER_LIMITS = "thruster_limits";
     static constexpr const char * CONF_THRUSTER_MAX = "max";
     static constexpr const char * CONF_THRUSTER_MIN = "min";
-    static constexpr const char * CONF_THRUSTER_FORCE_STEP = "force_step";
 
     static constexpr const char * CONF_GENERATOR_TYPE = "generator_type";
     static constexpr const char * CONF_GENERATOR_TYPE_OPT_TF = "tf";

@@ -668,13 +668,6 @@ void MvpControlROS::f_control_loop() {
 
     auto r = rclcpp::Rate(m_controller_frequency);
 
-    //keep track of the forces.
-    Eigen::VectorXd current_thruster_force;
-    current_thruster_force = Eigen::VectorXd::Zero(m_thrusters.size());
-
-    Eigen::VectorXd upper_limit(m_thrusters.size());
-    Eigen::VectorXd lower_limit(m_thrusters.size());
-
     while(rclcpp::ok()) {
         /**
          * Thread may not be able to sleep properly. This may happen using
@@ -709,7 +702,6 @@ void MvpControlROS::f_control_loop() {
                 std_msgs::msg::Float64 msg;
                 msg.data = 0.0;
                 m_thrusters.at(i)->m_thrust_publisher->publish(msg);
-                current_thruster_force[i] = 0;
             }
             continue;
         }
@@ -727,31 +719,12 @@ void MvpControlROS::f_control_loop() {
          * Calculate forces to be requested from thrusters. If operation fails,
          * do not send commands to thrusters.
          */
-        
-        ///update the force limit
-        for(uint64_t i = 0 ; i < m_thrusters.size() ; i++) {
-        upper_limit[i] = std::min(current_thruster_force[i] + m_thrusters[i]->m_force_step, m_thrusters[i]->m_force_max);
-        lower_limit[i] = std::max(current_thruster_force[i] - m_thrusters[i]->m_force_step, m_thrusters[i]->m_force_min);
-
-        // printf("thruster= %d,", i);
-        // printf("uppper: %f, ", upper_limit[i]);
-        // printf("lower: %f,", lower_limit[i]);
-        // printf("\r\n");
-        }
-
-        
-
-        m_mvp_control->set_lower_limit(lower_limit);
-
-        m_mvp_control->set_upper_limit(upper_limit);
-
         if(m_mvp_control->calculate_needed_forces(&needed_forces, dt)) {
         
             for(uint64_t i = 0 ; i < m_thrusters.size() ; i++) {
                 std::vector<std::complex<double>> roots;
                 std_msgs::msg::Float64 Nmsg;
                 Nmsg.data = needed_forces(i);
-                current_thruster_force[i] =  needed_forces(i);
                 // printf("###force for thruster %d: %f\r\n", i, needed_forces(i));
 
                 m_thrusters.at(i)->m_force_publisher->publish(Nmsg);
@@ -1007,12 +980,7 @@ void MvpControlROS::f_load_control_config()
             // std::cout<<poly_coef<<std::endl;
             this->declare_parameter(std::string()+CONF_THRUSTER_POLY + "/" + t_name, poly_coef);
             t->get_poly_solver()->set_coeff(poly_coef);
-
-            double force_step;
-            force_step = map["thruster_ids"][t_name]["force_step"].as<double>();
-            this->declare_parameter(std::string()+CONF_THRUSTER_FORCE_STEP + "/" + t_name, force_step);
-            this->get_parameter(std::string()+CONF_THRUSTER_FORCE_STEP + "/" + t_name, t->m_force_step);
-            
+ 
             m_thrusters.emplace_back(t);
         }
 

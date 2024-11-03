@@ -81,8 +81,6 @@ namespace ctrl {
 
         double m_force_min;
 
-        double m_force_step;
-
     public:
 
         //! @brief Default constructor
