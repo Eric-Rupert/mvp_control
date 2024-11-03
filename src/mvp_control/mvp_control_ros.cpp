@@ -126,6 +126,7 @@ MvpControlROS::MvpControlROS(std::string name) : Node(name)
      */
     m_process_value_publisher = this->create_publisher<mvp_msgs::msg::ControlProcess>(TOPIC_CONTROL_PROCESS_VALUE, 100);
     m_process_error_publisher = this->create_publisher<mvp_msgs::msg::ControlProcess>(TOPIC_CONTROL_PROCESS_ERROR, 100);
+    m_controller_state_publisher = this->create_publisher<std_msgs::msg::Bool>(TOPIC_CONTROLLER_STATE, 100);
 
     /**
      * Initialize services
@@ -140,15 +141,20 @@ MvpControlROS::MvpControlROS(std::string name) : Node(name)
         std::bind(&MvpControlROS::f_cb_srv_set_control_point, this, _1, _2)
         );
 
-    m_enable_controller_server = this->create_service<std_srvs::srv::Empty>(
-        SERVICE_CONTROL_ENABLE,
-        std::bind(&MvpControlROS::f_cb_srv_enable, this, _1, _2)
-        );
+    // m_enable_controller_server = this->create_service<std_srvs::srv::Empty>(
+    //     SERVICE_CONTROL_ENABLE,
+    //     std::bind(&MvpControlROS::f_cb_srv_enable, this, _1, _2)
+    //     );
 
-    m_disable_controller_server = this->create_service<std_srvs::srv::Empty>(
-        SERVICE_CONTROL_DISABLE,
-        std::bind(&MvpControlROS::f_cb_srv_disable, this, _1, _2)
-        );
+    // m_disable_controller_server = this->create_service<std_srvs::srv::Empty>(
+    //     SERVICE_CONTROL_DISABLE,
+    //     std::bind(&MvpControlROS::f_cb_srv_disable, this, _1, _2)
+    //     );
+
+    m_set_controller_server = this->create_service<std_srvs::srv::SetBool>(
+        SERVICE_SET_CONTROLLER,
+        std::bind(&MvpControlROS::f_cb_srv_set_controller, this, _1, _2)
+    );
 
     m_get_controller_state_server = this->create_service<std_srvs::srv::Trigger>(
         SERVICE_GET_CONTROLLER_STATE,
@@ -1015,22 +1021,38 @@ bool MvpControlROS::f_cb_srv_set_control_point(
 
 }
 
-bool MvpControlROS::f_cb_srv_enable(
-    const std::shared_ptr<std_srvs::srv::Empty::Request> req,
-    const std::shared_ptr<std_srvs::srv::Empty::Response> resp) {
-    RCLCPP_INFO_STREAM(this->get_logger(), "Controller enabled!");
-    m_enabled = true;
+// bool MvpControlROS::f_cb_srv_enable(
+//     const std::shared_ptr<std_srvs::srv::Empty::Request> req,
+//     const std::shared_ptr<std_srvs::srv::Empty::Response> resp) {
+//     RCLCPP_INFO_STREAM(this->get_logger(), "Controller enabled!");
+//     m_enabled = true;
 
-    return true;
-}
+//     return true;
+// }
 
-bool MvpControlROS::f_cb_srv_disable(
-    const std::shared_ptr<std_srvs::srv::Empty::Request> req,
-    const std::shared_ptr<std_srvs::srv::Empty::Response> resp) {
+// bool MvpControlROS::f_cb_srv_disable(
+//     const std::shared_ptr<std_srvs::srv::Empty::Request> req,
+//     const std::shared_ptr<std_srvs::srv::Empty::Response> resp) {
 
-    RCLCPP_INFO_STREAM(this->get_logger(), "Controller disabled!");
-    m_enabled = false;
+//     RCLCPP_INFO_STREAM(this->get_logger(), "Controller disabled!");
+//     m_enabled = false;
 
+//     return true;
+// }
+
+bool MvpControlROS::f_cb_srv_set_controller(
+            const std::shared_ptr<std_srvs::srv::SetBool::Request> req,
+            const std::shared_ptr<std_srvs::srv::SetBool::Response> resp){
+                
+    m_enabled = req->data;
+    resp->success = true;
+    resp->message = m_enabled ? "Controller enabled." : "Controller disabled.";
+
+    std_msgs::msg::Bool msg;
+    msg.data = m_enabled;
+
+    // Publish the message
+    m_controller_state_publisher->publish(msg);
     return true;
 }
 

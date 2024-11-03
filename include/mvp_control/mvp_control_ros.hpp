@@ -43,6 +43,8 @@
 #include "std_msgs/msg/float32.hpp"
 #include "std_srvs/srv/empty.hpp"
 #include "std_srvs/srv/trigger.hpp"
+#include "std_srvs/srv/set_bool.hpp"
+#include "std_msgs/msg/bool.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 // #include "dynamic_reconfigure/server.h"
 
@@ -180,11 +182,11 @@ namespace ctrl {
 
         //! @brief Enable controller ros service server
         // ros::ServiceServer m_enable_controller_server;
-        rclcpp::Service<std_srvs::srv::Empty>::SharedPtr m_enable_controller_server;
+        // rclcpp::Service<std_srvs::srv::Empty>::SharedPtr m_enable_controller_server;
 
         //! @brief Disable controller ros service server
         // ros::ServiceServer m_disable_controller_server;
-        rclcpp::Service<std_srvs::srv::Empty>::SharedPtr m_disable_controller_server;
+        // rclcpp::Service<std_srvs::srv::Empty>::SharedPtr m_disable_controller_server;
 
         //! @brief Get current controller state enabled or disabled
         // ros::ServiceServer m_get_controller_state_server;
@@ -193,6 +195,9 @@ namespace ctrl {
         //! @brief Active mode getter ros service server
         // ros::ServiceServer m_get_active_mode_server;
         rclcpp::Service<mvp_msgs::srv::GetControlMode>::SharedPtr m_get_active_mode_server;
+
+        //! @brief Set controller service server
+        rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr m_set_controller_server;
 
         //! @brief Trivial subscriber
         // ros::Subscriber m_odometry_subscriber;
@@ -209,6 +214,12 @@ namespace ctrl {
         //! @brief Publishes process error publisher
         // ros::Publisher m_process_error_publisher;
         rclcpp::Publisher<mvp_msgs::msg::ControlProcess>::SharedPtr m_process_error_publisher;
+        
+        //! @brief Publishes process error publisher
+        // ros::Publisher m_process_error_publisher;
+        rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr m_controller_state_publisher;
+        
+        
 
         // //! @brief Thrust publisher
         // rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr m_thrust_publisher;
@@ -393,6 +404,10 @@ namespace ctrl {
         bool f_cb_srv_disable(
             const std::shared_ptr<std_srvs::srv::Empty::Request> req,
             const std::shared_ptr<std_srvs::srv::Empty::Response> resp);
+
+        bool f_cb_srv_set_controller(
+            const std::shared_ptr<std_srvs::srv::SetBool::Request> req,
+            const std::shared_ptr<std_srvs::srv::SetBool::Response> resp);
 
         /**
          * @brief get controller state
