@@ -381,30 +381,6 @@ namespace ctrl {
             const std::shared_ptr<mvp_msgs::srv::SetControlPoint::Request> req,
             const std::shared_ptr<mvp_msgs::srv::SetControlPoint::Response> resp);
 
-        /**
-         * @brief Enables the controller
-         *
-         * @param req Trivial empty request
-         * @param resp Trivial empty response
-         * @return true
-         * @return false
-         */
-        bool f_cb_srv_enable(
-            const std::shared_ptr<std_srvs::srv::Empty::Request> req,
-            const std::shared_ptr<std_srvs::srv::Empty::Response> resp);
-
-        /**
-         * @brief disable the controller
-         *
-         * @param req Trivial empty request
-         * @param resp Trivial empty response
-         * @return true
-         * @return false
-         */
-        bool f_cb_srv_disable(
-            const std::shared_ptr<std_srvs::srv::Empty::Request> req,
-            const std::shared_ptr<std_srvs::srv::Empty::Response> resp);
-
         bool f_cb_srv_set_controller(
             const std::shared_ptr<std_srvs::srv::SetBool::Request> req,
             const std::shared_ptr<std_srvs::srv::SetBool::Response> resp);
