@@ -821,64 +821,64 @@ void MvpControlROS::f_load_control_config()
                     this->get_parameter(param_name + CONF_PID_P, m.pid_x.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_x.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_x.kd);
-                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_x.pid_max);
-                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_x.pid_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_x.k_i_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_x.k_i_min);
                 }
                 if(dof_name.compare(CONF_DOF_Y) == 0){
                     param_name = "control_modes/" + mode + "/" + dof_name + "/";
                     this->get_parameter(param_name + CONF_PID_P, m.pid_y.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_y.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_y.kd);
-                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_y.pid_max);
-                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_y.pid_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_y.k_i_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_y.k_i_min);
                 }
                 if(dof_name.compare(CONF_DOF_Z) == 0){
                     param_name = "control_modes/" + mode + "/" + dof_name + "/";
                     this->get_parameter(param_name + CONF_PID_P, m.pid_z.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_z.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_z.kd);
-                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_z.pid_max);
-                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_z.pid_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_z.k_i_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_z.k_i_min);
                 }
                 if(dof_name.compare(CONF_DOF_ROLL) == 0){
                     param_name = "control_modes/" + mode + "/" + dof_name + "/";
                     this->get_parameter(param_name + CONF_PID_P, m.pid_roll.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_roll.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_roll.kd);
-                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_roll.pid_max);
-                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_roll.pid_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_roll.k_i_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_roll.k_i_min);
                 }
                 if(dof_name.compare(CONF_DOF_PITCH) == 0){
                     param_name = "control_modes/" + mode + "/" + dof_name + "/";
                     this->get_parameter(param_name + CONF_PID_P, m.pid_pitch.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_pitch.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_pitch.kd);
-                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_pitch.pid_max);
-                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_pitch.pid_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_pitch.k_i_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_pitch.k_i_min);
                 }
                 if(dof_name.compare(CONF_DOF_YAW) == 0){
                     param_name = "control_modes/" + mode + "/" + dof_name + "/";
                     this->get_parameter(param_name + CONF_PID_P, m.pid_yaw.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_yaw.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_yaw.kd);
-                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_yaw.pid_max);
-                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_yaw.pid_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_yaw.k_i_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_yaw.k_i_min);
                 }
                 if(dof_name.compare(CONF_DOF_U) == 0){
                     param_name = "control_modes/" + mode + "/" + dof_name + "/";
                     this->get_parameter(param_name + CONF_PID_P, m.pid_u.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_u.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_u.kd);
-                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_u.pid_max);
-                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_u.pid_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_u.k_i_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_u.k_i_min);
                 }
                 if(dof_name.compare(CONF_DOF_V) == 0){
                     param_name = "control_modes/" + mode + "/" + dof_name + "/";
                     this->get_parameter(param_name + CONF_PID_P, m.pid_v.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_v.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_v.kd);
-                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_v.pid_max);
-                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_v.pid_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_v.k_i_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_v.k_i_min);
                 }
 
                 if(dof_name.compare(CONF_DOF_P) == 0){
@@ -886,24 +886,24 @@ void MvpControlROS::f_load_control_config()
                     this->get_parameter(param_name + CONF_PID_P, m.pid_p.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_p.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_p.kd);
-                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_p.pid_max);
-                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_p.pid_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_p.k_i_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_p.k_i_min);
                 }
                 if(dof_name.compare(CONF_DOF_Q) == 0){
                     param_name = "control_modes/" + mode + "/" + dof_name + "/";
                     this->get_parameter(param_name + CONF_PID_P, m.pid_q.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_q.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_q.kd);
-                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_q.pid_max);
-                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_q.pid_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_q.k_i_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_q.k_i_min);
                 }
                 if(dof_name.compare(CONF_DOF_R) == 0){
                     param_name = "control_modes/" + mode + "/" + dof_name + "/";
                     this->get_parameter(param_name + CONF_PID_P, m.pid_r.kp);
                     this->get_parameter(param_name + CONF_PID_I, m.pid_r.ki);
                     this->get_parameter(param_name + CONF_PID_D, m.pid_r.kd);
-                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_r.pid_max);
-                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_r.pid_min);
+                    this->get_parameter(param_name + CONF_PID_MAX, m.pid_r.k_i_max);
+                    this->get_parameter(param_name + CONF_PID_MIN, m.pid_r.k_i_min);
                 }
                 //check dof enabled
                 auto found =std::find_if(CONF_DOF_LOOKUP.begin(), CONF_DOF_LOOKUP.end(),
@@ -1163,31 +1163,31 @@ bool MvpControlROS::f_amend_control_mode(std::string mode) {
                 found->pid_r.kd;
 
         pid_max <<
-                found->pid_x.pid_max,
-                found->pid_y.pid_max,
-                found->pid_z.pid_max,
-                found->pid_roll.pid_max,
-                found->pid_pitch.pid_max,
-                found->pid_yaw.pid_max,
-                found->pid_u.pid_max,
-                found->pid_v.pid_max,
-                found->pid_w.pid_max,
-                found->pid_p.pid_max,
-                found->pid_q.pid_max,
-                found->pid_r.pid_max;
+                found->pid_x.k_i_max,
+                found->pid_y.k_i_max,
+                found->pid_z.k_i_max,
+                found->pid_roll.k_i_max,
+                found->pid_pitch.k_i_max,
+                found->pid_yaw.k_i_max,
+                found->pid_u.k_i_max,
+                found->pid_v.k_i_max,
+                found->pid_w.k_i_max,
+                found->pid_p.k_i_max,
+                found->pid_q.k_i_max,
+                found->pid_r.k_i_max;
         pid_min <<
-                found->pid_x.pid_min,
-                found->pid_y.pid_min,
-                found->pid_z.pid_min,
-                found->pid_roll.pid_min,
-                found->pid_pitch.pid_min,
-                found->pid_yaw.pid_min,
-                found->pid_u.pid_min,
-                found->pid_v.pid_min,
-                found->pid_w.pid_min,
-                found->pid_p.pid_min,
-                found->pid_q.pid_min,
-                found->pid_r.pid_min;
+                found->pid_x.k_i_min,
+                found->pid_y.k_i_min,
+                found->pid_z.k_i_min,
+                found->pid_roll.k_i_min,
+                found->pid_pitch.k_i_min,
+                found->pid_yaw.k_i_min,
+                found->pid_u.k_i_min,
+                found->pid_v.k_i_min,
+                found->pid_w.k_i_min,
+                found->pid_p.k_i_min,
+                found->pid_q.k_i_min,
+                found->pid_r.k_i_min;
 
         m_mvp_control->get_pid()->set_kp(p);
         m_mvp_control->get_pid()->set_ki(i);
